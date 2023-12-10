@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 class Locations extends Component {
     constructor(props) {
         super(props);
-        this.state = {
+        this.state = {  
             locationList: [],
             sortAscending: false,
         }
