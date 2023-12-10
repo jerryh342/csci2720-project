@@ -77,6 +77,13 @@ const CommentSchema = Schema({
   },
 });
 
+const LoginSchema = new Schema({
+  username: { type: String, required: true },
+  email: { type: String, required: true },
+  password: { type: String, required: true },
+});
+
 exports.EventSchema = EventSchema;
+exports.LoginSchema = LoginSchema;
 exports.CommentSchema = CommentSchema;
 exports.VenueSchema = VenueSchema;

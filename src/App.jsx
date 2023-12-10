@@ -9,6 +9,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route path="/location/:venueId" element={<SingleLocation />} />
           <Route path="*" element={<NoMatch />} />
         </Routes>
