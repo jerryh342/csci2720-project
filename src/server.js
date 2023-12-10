@@ -215,9 +215,32 @@ app.get("/ev/:eventId", (req, res) =>{
   });
   });
 
-//Read event with Quota greater than q
+//Read Specific User data
+app.get("/user/:userName", (req, res) =>{
+  Event.findOne({username:req.params.userName})
+  .then((data) => {
+    if(!data){
+      res.setHeader('Content-Type', 'text/plain');
+      res.status(404).send('User was not found');
+    }
+    else{
+      const userData ={
+        username: data.username,
+        email: data.email,
+        password: data.password}
+      res.setHeader('Content-Type', 'text/plain');
+      res.status(200).send(JSON.stringify(userData,null,2));
+    }
+})
+  .catch((err) => {
+    res.setHeader('Content-Type', 'text/plain');
+    res.status(500).send('Internal Server Error');
+  });
+  });
+
+//Read event with Price greater than p
   app.get("/ev", (req, res) =>{
-    if (req.query.q === undefined){
+    if (req.query.p === undefined){
       Event.find({})
       .populate("venue")
       .then((data) => {
@@ -247,7 +270,7 @@ app.get("/ev/:eventId", (req, res) =>{
       });
     }
     else {
-      Event.find({quota:{$gte:req.query.q}})
+      Event.find({price:{$gte:req.query.p}})
       .populate("venue")
       .then((data) => {
         const output = [] ;
@@ -327,6 +350,63 @@ app.get("/ev/:eventId", (req, res) =>{
         res.status(500).send('Internal Server Error');
       });
 });
+
+// Delete User data
+app.delete("/user/:userName", (req, res) =>{
+  LoginSchema.findOneAndDelete({username:req.params.userName})
+    .then((data) => {
+      if(data){res.sendStatus(204);}
+      else{
+        res.setHeader('Content-Type', 'text/plain');
+        res.status(404).send('Event was not found, no event was deleted.');
+        console.log('Event was not found, no event was deleted.');
+      }
+    })
+    .catch((error) => {
+      res.setHeader('Content-Type', 'text/plain');
+      res.status(500).send('Internal Server Error');
+    });
+});
+
+//Update Event Data
+  app.put("/ev/:eventId", (req, res) =>{
+    const newvenueId = req.body.venueId;
+    Venue.findOne({venueId: newvenueId})
+    .then((NewVenueData) => {
+      let NewVenueId = NewVenueData._id;
+      let new_data = {
+        title: req.body.title,
+        venue: NewVenueData._id,
+        dateTime: req.body.dateTime,
+        desc: req.body.desc,
+        presenter: req.body.presenter,
+        price: req.body.price,
+      };
+      Event.findOneAndUpdate(
+        {eventId: {$eq:req.body.eventId}},
+        new_data,
+        {new: true},
+      ).populate("venue")      
+      .then((data) => {
+        const NeweventData ={
+          eventId: data.eventId,
+          name: data.name,
+          venue:
+          {
+            venueId: data.venue.venueId,
+            venueName: data.venue.venueName,
+            lat: data.venue.lat,
+            long: data.venue.long,
+          },
+            dateTime: data.dateTime,
+            desc: data.desc,
+            presenter: data.presenter,
+            price: data.price}
+        res.setHeader('Content-Type', 'text/plain');
+        res.status(200).send(JSON.stringify(NeweventData,null,2));})
+      .catch((error) => console.log(error));
+    }) 
+        });  
 
 //Update Event Data
   app.put("/ev/:eventId", (req, res) =>{
