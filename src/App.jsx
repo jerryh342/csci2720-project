@@ -3,13 +3,20 @@ import "./App.css";
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SingleLocation from "./Components/SingleLocation.jsx";
+import Locations from "./Components/Locations.jsx";
+import Login from "./Components/login.js";
+import SignUp from "./Components/signup.js";
 import NoMatch from "./Components/NoMatch.jsx";
+import Home from "./Components/home.js";
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<SignUp />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/location" element={<Locations />} />
           <Route path="/location/:venueId" element={<SingleLocation />} />
           <Route path="*" element={<NoMatch />} />
         </Routes>
