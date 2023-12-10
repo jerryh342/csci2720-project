@@ -58,7 +58,7 @@ class Map extends Component {
             method: "POST",
         })
         .then((r) => {    
-            this.setState({
+            this.setState({  
                 lng: r.venue.long,
                 lat: r.venue.lat,
             });
