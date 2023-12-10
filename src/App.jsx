@@ -9,7 +9,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/location/:locId" element={<SingleLocation />} />
+          <Route path="/location/:venueId" element={<SingleLocation />} />
           <Route path="*" element={<NoMatch />} />
         </Routes>
       </BrowserRouter>

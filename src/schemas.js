@@ -67,7 +67,7 @@ const CommentSchema = Schema({
     type: String,
     required: true,
   },
-  locId: {
+  venueId: {
     type: Number,
     required: true,
   },
