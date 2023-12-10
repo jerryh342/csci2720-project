@@ -74,6 +74,193 @@ app.post("/newcomment", (req, res) => {
     });
 });
 
+//Read Specific Event data
+ app.get("/ev/:eventId", (req, res) =>{
+    Event.findOne({eventId:req.params.eventId})
+    .populate("venue")
+    .then((data) => {
+      if(!data){
+        res.setHeader('Content-Type', 'text/plain');
+        res.status(404).send('Event was not found');
+      }
+      else{
+        const eventData ={
+          eventId: data.eventId,
+          title: data.title,
+          venue:
+          {
+          venueId: data.venue.venueId,
+          venueName: data.venue.venueName,
+          lat: data.venue.lat,
+          long: data.venue.long,
+        },
+          dateTime: data.dateTime,
+          desc: data.desc,
+          presenter: data.presenter,
+          price: data.price}
+        res.setHeader('Content-Type', 'text/plain');
+        res.status(200).send(JSON.stringify(eventData,null,2));
+      }
+  })
+    .catch((err) => {
+      res.setHeader('Content-Type', 'text/plain');
+      res.status(500).send('Internal Server Error');
+    });
+    });
+
+//Read event with Quota greater than q
+    app.get("/ev", (req, res) =>{
+      if (req.query.q === undefined){
+        Event.find({})
+        .populate("venue")
+        .then((data) => {
+          const output = [] ;
+          for (length in data){
+              output.push({
+                eventId: data[length].eventId,
+                title: data[length].title,
+                venue:
+                {
+                venueId: data[length].venue.venueId,
+                venueName: data[length].venue.venueName,
+                lat: data[length].venue.lat,
+                long: data[length].venue.long,
+              },
+                dateTime: data[length].dateTime,
+                desc: data[length].desc,
+                presenter: data[length].presenter,
+                price: data[length].price})
+          }
+          res.setHeader('Content-Type', 'text/plain');
+          res.status(200).send(JSON.stringify(output,null,2));
+          })
+        .catch((err) => {
+          res.setHeader('Content-Type', 'text/plain');
+          res.status(500).send('Internal Server Error');
+        });
+      }
+      else {
+        Event.find({quota:{$gte:req.query.q}})
+        .populate("venue")
+        .then((data) => {
+          const output = [] ;
+          for (length in data){
+            output.push({
+              eventId: data[length].eventId,
+              title: data[length].title,
+              venue:
+              {
+              venueId: data[length].venue.venueId,
+              venueName: data[length].venue.venueName,
+              lat: data[length].venue.lat,
+              long: data[length].venue.long,
+            },
+              dateTime: data[length].dateTime,
+              desc: data[length].desc,
+              presenter: data[length].presenter,
+              price: data[length].price})
+        }
+          res.setHeader('Content-Type', 'text/plain');
+          res.status(200).send(JSON.stringify(output,null,2));
+          })
+        .catch((err) => {
+          res.setHeader('Content-Type', 'text/plain');
+          res.status(500).send('Internal Server Error');
+        });
+      }
+  });
+   
+//Create Event data
+    app.post('/ev', (req, res) => {
+      const venueId = req.body.venueId;
+      Venue.findOne({venueId:venueId})
+      .then((venueData) => {
+            Event.findOne({}).sort({eventId:-1}).limit(1)
+            .then((data) => {
+              const newMax = data.eventId+1;
+              let newEvent = new Event({
+                eventId: newMax,
+                title: req.body.title,
+                venue: venueData._id,
+                dateTime: data.dateTime,
+                desc: data.desc,
+                presenter: data.presenter,
+                price: req.body.price,
+              });
+              newEvent
+                .save()
+                .then(() => {
+                  res.status(201).send(`http://localhost:3000/ev/${newMax}`);
+                  console.log("a new event created successfully");
+                })
+                .catch((error) => {
+                  console.log("failed to save new event");
+                });
+            })
+          })
+      .catch((err) => {
+        res.setHeader('Content-Type', 'text/plain');
+        res.status(500).send('Internal Server Error');
+      });
+  });
+
+// Delete Event data
+      app.delete("/ev/:eventId", (req, res) =>{
+      Event.findOneAndDelete({eventId:req.params.eventId})
+        .then((data) => {
+          if(data){res.sendStatus(204);}
+          else{
+            res.setHeader('Content-Type', 'text/plain');
+            res.status(404).send('Event was not found, no event was deleted.');
+            console.log('Event was not found, no event was deleted.');
+          }
+        })
+        .catch((error) => {
+          res.setHeader('Content-Type', 'text/plain');
+          res.status(500).send('Internal Server Error');
+        });
+  });
+
+//Update Event Data
+    app.put("/ev/:eventId", (req, res) =>{
+      const newvenueId = req.body.venueId;
+      Venue.findOne({venueId: newvenueId})
+      .then((NewVenueData) => {
+        let NewVenueId = NewVenueData._id;
+        let new_data = {
+          title: req.body.title,
+          venue: NewVenueData._id,
+          dateTime: req.body.dateTime,
+          desc: req.body.desc,
+          presenter: req.body.presenter,
+          price: req.body.price,
+        };
+        Event.findOneAndUpdate(
+          {eventId: {$eq:req.body.eventId}},
+          new_data,
+          {new: true},
+        ).populate("venue")      
+        .then((data) => {
+          const NeweventData ={
+            eventId: data.eventId,
+            name: data.name,
+            venue:
+            {
+              venueId: data.venue.venueId,
+              venueName: data.venue.venueName,
+              lat: data.venue.lat,
+              long: data.venue.long,
+            },
+              dateTime: data.dateTime,
+              desc: data.desc,
+              presenter: data.presenter,
+              price: data.price}
+          res.setHeader('Content-Type', 'text/plain');
+          res.status(200).send(JSON.stringify(NeweventData,null,2));})
+        .catch((error) => console.log(error));
+      }) 
+          });  
+
 // handle ALL requests
 app.all("/*", (req, res) => {
   //console.log(req);
