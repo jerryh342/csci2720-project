@@ -16,8 +16,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<SignUp />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/location" element={<Locations />} />
-          <Route path="/location/:venueId" element={<SingleLocation />} />
+          <Route path="/venue" element={<Locations />} />
+          <Route path="/venue/:venueId" element={<SingleLocation />} />
           <Route path="*" element={<NoMatch />} />
         </Routes>
       </BrowserRouter>
