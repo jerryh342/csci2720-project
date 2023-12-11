@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Card, Spin, List, Row, Col } from "antd";
-import { Descriptions } from "antd";
+import { Card, Spin, List, Row, Col, Descriptions, Button, Form, Input, Divider, Space } from "antd";
 import axios from "axios";
+import NavBar from "./navbar";
 import { useParams } from "react-router-dom";
 import { GoogleMap, useLoadScript, MarkerF } from "@react-google-maps/api";
 
+const { TextArea } = Input;
 function TempMap(props) {
   const libraries = ["places"];
   const venue = props.venue;
@@ -28,7 +29,7 @@ function TempMap(props) {
     return <div>Rendering</div>;
   }
   return (
-    <GoogleMap mapContainerStyle={mapContainerStyle} zoom={10} center={center}>
+    <GoogleMap mapContainerStyle={mapContainerStyle} zoom={15} center={center}>
       <MarkerF position={center} />
     </GoogleMap>
   );
@@ -72,13 +73,24 @@ function LocationDetails(props) {
 }
 
 function CommentList(props) {
+  console.log(props.comments);
   return (
     <List
-      itemLayout="horizontal"
+      itemLayout="vertical"
       dataSource={props.comments}
+      pagination={{
+        onChange: (page) => {
+          console.log(page);
+        },
+        pageSize: 3,
+      }}
       renderItem={(item, index) => (
         <List.Item>
-          <List.Item.Meta avatar={[]} title={item.user} description={item.content} />
+          <List.Item.Meta
+            style={{ whiteSpace: "pre", textAlign: "left" }}
+            title={item.user}
+            description={item.content}
+          />
         </List.Item>
       )}
     />
@@ -90,9 +102,11 @@ function Comments(props) {
   const [commentIsSpinning, setCommentIsSpinning] = useState(true);
   const [formIsSpinning, setFormIsSpinning] = useState(false);
   const [comments, setComments] = useState([]);
+  const maxWidth = 800;
   useEffect(() => {
     getComments();
   }, []);
+
   function getComments() {
     setCommentIsSpinning(true);
     axios({
@@ -108,16 +122,11 @@ function Comments(props) {
         setCommentIsSpinning(false);
       });
   }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const formJson = Object.fromEntries(formData.entries());
+  function handleSubmit(data) {
     let payload = {
-      user: "Test",
+      user: props.user,
       venueId: Number(props.venueId),
-      content: formJson.comment,
+      content: data.newCommentContent,
     };
     setFormIsSpinning(true);
     axios({
@@ -138,26 +147,34 @@ function Comments(props) {
 
   return (
     <>
-      <div>
-        <h3>Comments</h3>
-        <Spin spinning={commentIsSpinning}>
-          <CommentList comments={comments} />
-        </Spin>
+      <div align="center">
+        <Card title={"Comments"} style={{ maxWidth: maxWidth, align: "center" }}>
+          <Spin spinning={commentIsSpinning}>
+            <CommentList comments={comments} />
+          </Spin>
+        </Card>
       </div>
-      <Card>
-        <Spin spinning={formIsSpinning}>
-          <form id="newUserComment" onSubmit={handleSubmit}>
-            <textarea rows="5" name="comment" placeholder="Type your comment here!" required></textarea>
-            <br></br>
-            <button>Click me to add new comment</button>
-          </form>
-        </Spin>
+      <Card loading={formIsSpinning} title={"New comment"}>
+        <Form name="newUserComment" onFinish={handleSubmit}>
+          <Form.Item name="newCommentContent" rules={[{ required: true, message: "Comment cannot be empty!" }]}>
+            <TextArea
+              showCount
+              maxLength={200}
+              placeholder="Your Thoughts..."
+              style={{ height: 100, resize: "none", maxWidth: maxWidth }}
+            />
+          </Form.Item>
+          <Button type="primary" htmlType="submit">
+            Click me to add new comment
+          </Button>
+        </Form>
       </Card>
     </>
   );
 }
 
 function SingleLocation(props) {
+  const [user, setUser] = useState(null);
   const { venueId } = useParams();
   const [venue, setVenue] = useState({});
   function getLocationDetails() {
@@ -167,20 +184,39 @@ function SingleLocation(props) {
     })
       .then((data) => {
         setVenue(data.data);
+        document.title = data.data.venueName;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  function getCurrentUser() {
+    axios({
+      url: "http://localhost:8000/checkAuth",
+      method: "GET",
+      withCredentials: true,
+    })
+      .then((data) => {
+        setUser(data.data.username);
       })
       .catch((err) => {
         console.log(err);
       });
   }
   useEffect(() => {
-    document.title = "Location" + venueId;
     getLocationDetails();
+    getCurrentUser();
   }, []);
+
   console.log(venueId);
   return (
     <>
       <div>
+        <NavBar></NavBar>
+      </div>
+      <div>
         <h1>{venue.venueName}</h1>
+        <Divider />
         <div>
           <Row>
             <Col span={12}>
@@ -191,7 +227,8 @@ function SingleLocation(props) {
             </Col>
           </Row>
         </div>
-        <Comments venueId={venueId} />
+        <Divider />
+        <Comments venueId={venueId} user={user} />
       </div>
     </>
   );

@@ -5,7 +5,7 @@ import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, Redirect } from "react-router-dom";
+import { useNavigate, Redirect, redirect } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 
 const NavBar = () => {
@@ -32,6 +32,7 @@ const NavBar = () => {
         setUser(res.data);
       } catch (error) {
         setUser(null);
+        return navigate("/login");
       }
     };
     checkAuth();
