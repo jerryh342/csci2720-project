@@ -63,8 +63,8 @@ const VenueSchema = new Schema({
 
 const CommentSchema = Schema({
   user: {
-    //TODO: UserSchema ObjectId
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: "login",
     required: true,
   },
   venueId: {
