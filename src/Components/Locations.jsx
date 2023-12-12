@@ -2,41 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import { Table, Input } from 'antd';
 import { SearchOutlined} from '@ant-design/icons';
-import { GoogleMap, useLoadScript, MarkerF } from "@react-google-maps/api";
-
-const libraries = ["places"];
-
-function TempMap() {
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBGGC2kgrhzogounenjJfsElrOkWmOFlM0",
-    libraries,
-  });
-  const mapContainerStyle = {
-    width: "100%",
-    height: "100%",
-  };
-  const center = {
-    lat: 22.302711,
-    lng: 114.177216,
-  };
-  if (loadError) {
-    console.log(loadError);
-    return <div>Error loading map</div>;
-  }
-  if (!isLoaded) {
-    return <div>Rendering</div>;
-  }
-  return (
-    <GoogleMap mapContainerStyle={mapContainerStyle} zoom={8} center={center}>
-      {/* {locationList && locationList.map((location, index) => 
-        // <MarkerF key={index} position={{ lat: location.lat, lng: location.lng }} />
-      )} */
-      <MarkerF position={center} />
-      }
-    </GoogleMap>
-  );
-}
-
+import Map from './Map';
 
 class Locations extends Component {
   constructor(props) {
@@ -126,8 +92,8 @@ class Locations extends Component {
             prefix={<SearchOutlined />}
           />
           <br />
-          <TempMap /> 
           <Table columns={columns} dataSource={this.state.filteredLocations} rowKey="locid" />
+          <Map venues={this.state.locationList} /> 
         </main>
     );
   }

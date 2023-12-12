@@ -161,6 +161,23 @@ app.get("/venue/:venueId", (req, res) => {
       res.send("Venue not found");
     });
 });
+
+app.get("/venue/:venueId/ev", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  Event.find()
+    .populate({
+      path: "venue",
+      match: { venueId: req.params.venueId },
+    })
+    .then((data) => {
+      console.log(data);
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404);
+      res.send("Venue not found");
+    });
+});
 // get comments
 app.get("/comments/:venueId", (req, res) => {
   res.setHeader("Content-Type", "text/plain");
@@ -194,7 +211,7 @@ app.post("/newcomment", (req, res) => {
       })
         .then(() => {
           res.status(200);
-          res.send("New event created");
+          res.send("New comment created");
         })
         .catch((err) => {
           res.status(406);
