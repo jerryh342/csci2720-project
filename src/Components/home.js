@@ -49,7 +49,6 @@ function Home() {
     <div>
       <NavBar />
       <h1>Home Component, You are logged in</h1>
-      <Button onClick={logOut}>LogOut</Button>
     </div>
   );
 }

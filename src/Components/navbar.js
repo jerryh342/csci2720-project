@@ -1,12 +1,37 @@
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
 // import UseAuth from '../hooks/auth';
-import NavDropdown from "react-bootstrap/NavDropdown";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Redirect, redirect } from "react-router-dom";
-import Button from "react-bootstrap/Button";
+import { AppstoreOutlined, MailOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import { Breadcrumb, Layout, Menu, theme } from 'antd';
+const { Header, Content, Footer } = Layout;
+const { SubMenu } = Menu;
+const menuItems = [
+  {
+    key: '1',
+    label: (
+      <a target="_blank" rel="noopener noreferrer" href="http://www.alipay.com/">
+        General
+      </a>
+    ),
+  },
+  {
+    key: '2',
+    label: (
+      <a target="_blank" rel="noopener noreferrer" href="http://www.taobao.com/">
+        Layout
+      </a>
+    ),
+  },
+  {
+    key: '3',
+    label: (
+      <a target="_blank" rel="noopener noreferrer" href="http://www.tmall.com/">
+        Navigation
+      </a>
+    ),
+  },
+];
 
 const NavBar = () => {
   // const user = UseAuth()
@@ -40,40 +65,34 @@ const NavBar = () => {
   console.log("user>>", user);
   if (!user) {
     return (
-      <Navbar expand="lg" className="bg-body-tertiary" bg="primary" data-bs-theme="dark">
-        <Container>
-          <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
-        </Container>
-      </Navbar>
+
+      <Menu mode="horizontal" theme="dark" style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
+          CSCI 2720 Project
+        </Menu.Item>
+        <Menu.Item key="right-item" style={{ marginLeft: 'auto' }} icon={<UserOutlined />}>
+          Guest
+        </Menu.Item>
+      </Menu>
+
     );
   } else {
     return (
-      <Navbar expand="lg" className="bg-body-tertiary" bg="primary" data-bs-theme="dark">
-        <Container>
-          <Navbar.Brand href="#home">Hi {user.username}</Navbar.Brand>
-          <Navbar.Brand>
-            <Button>Logout</Button>
-          </Navbar.Brand>
-          {/* <Navbar.Toggle aria-controls="basic-navbar-nav" /> */}
-          {/* <Navbar.Collapse id="basic-navbar-nav">
-              <Nav className="me-auto">
-                <Nav.Link href="#home">Home</Nav.Link>
-                <Nav.Link href="#link">Link</Nav.Link>
-                <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-                  <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                  <NavDropdown.Item href="#action/3.2">
-                    Another action
-                  </NavDropdown.Item>
-                  <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <NavDropdown.Item href="#action/3.4">
-                    Separated link
-                  </NavDropdown.Item>
-                </NavDropdown>
-              </Nav>
-            </Navbar.Collapse> */}
-        </Container>
-      </Navbar>
+      <Menu mode="horizontal" theme="dark" style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
+          CSCI 2720 Project
+        </Menu.Item>
+        <Menu.Item key="right-item" style={{ marginLeft: 'auto' }} disableActive>
+          <SubMenu key="SubMenu" icon={<UserOutlined />} title={user.username}>
+            
+              <Menu.Item key="setting:1" onClick={logOut}>Logout</Menu.Item>
+              <Menu.Item key="setting:2" onClick={()=>navigate('/register')}>Add new users</Menu.Item>
+
+            
+          </SubMenu>
+
+        </Menu.Item>
+      </Menu>
     );
   }
 };
