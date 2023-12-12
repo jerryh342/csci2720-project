@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Card, Spin, List, Row, Col, Descriptions, Button, Form, Input, Divider, Space } from "antd";
+import { Card, Spin, List, Row, Col, Descriptions, Button, Form, Input, Divider, Space, Table } from "antd";
 import axios from "axios";
 import NavBar from "./navbar";
+import Map from "./Map";
 import { useParams } from "react-router-dom";
 import { GoogleMap, useLoadScript, MarkerF } from "@react-google-maps/api";
-
 const { TextArea } = Input;
+
 function TempMap(props) {
   const libraries = ["places"];
   const venue = props.venue;
@@ -72,8 +73,52 @@ function LocationDetails(props) {
   );
 }
 
+function EventDetails(props) {
+  const events = props.events.map((item, idx) => ({ ...item, key: idx }));
+  console.log(events);
+  const columns = [
+    {
+      title: "Event ID",
+      dataIndex: "eventId",
+      key: "eventId",
+    },
+    {
+      title: "Event Title",
+      dataIndex: "title",
+      key: "title",
+    },
+    {
+      title: "Date",
+      dataIndex: "dateTime",
+      key: "dateTime",
+    },
+    {
+      title: "Event Description",
+      dataIndex: "desc",
+      key: "desc",
+    },
+    {
+      title: "Presented By",
+      dataIndex: "presenter",
+      key: "presenter",
+    },
+    {
+      title: "Price",
+      dataIndex: "price",
+      key: "price",
+    },
+  ];
+  return (
+    <>
+      <div>
+        <Table title={() => <h3 textAlign="center">Event Details</h3>} columns={columns} bordered dataSource={events} />
+      </div>
+    </>
+  );
+}
+
 function CommentList(props) {
-  console.log(props.comments);
+  //console.log(props.comments);
   return (
     <List
       itemLayout="vertical"
@@ -113,8 +158,8 @@ function Comments(props) {
       url: "http://localhost:8000/comments/" + props.venueId,
       method: "GET",
     })
-      .then((data) => {
-        setComments(data.data);
+      .then((res) => {
+        setComments(res.data);
         setCommentIsSpinning(false);
       })
       .catch((err) => {
@@ -134,8 +179,8 @@ function Comments(props) {
       method: "POST",
       data: payload,
     })
-      .then((data) => {
-        console.log(data);
+      .then((res) => {
+        console.log(res.data);
         setFormIsSpinning(false);
         getComments();
       })
@@ -176,15 +221,28 @@ function Comments(props) {
 function SingleLocation(props) {
   const [user, setUser] = useState(null);
   const { venueId } = useParams();
-  const [venue, setVenue] = useState({});
+  const [venue, setVenue] = useState([]);
+  const [events, setEvents] = useState([]);
   function getLocationDetails() {
     axios({
       url: "http://localhost:8000/venue/" + venueId,
       method: "GET",
     })
-      .then((data) => {
-        setVenue(data.data);
-        document.title = data.data.venueName;
+      .then((res) => {
+        setVenue(res.data);
+        document.title = res.data.venueName;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  function getVenueEvents() {
+    axios({
+      url: "http://localhost:8000/venue/" + venueId + "/ev",
+      method: "GET",
+    })
+      .then((res) => {
+        setEvents(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -196,8 +254,8 @@ function SingleLocation(props) {
       method: "GET",
       withCredentials: true,
     })
-      .then((data) => {
-        setUser(data.data.username);
+      .then((res) => {
+        setUser(res.data.username);
       })
       .catch((err) => {
         console.log(err);
@@ -205,29 +263,26 @@ function SingleLocation(props) {
   }
   useEffect(() => {
     getLocationDetails();
+    getVenueEvents();
     getCurrentUser();
   }, []);
 
-  console.log(venueId);
   return (
     <>
-      <div>
-        <NavBar></NavBar>
-      </div>
+      <div>{/*<NavBar></NavBar>*/}</div>
       <div>
         <h1>{venue.venueName}</h1>
         <Divider />
         <div>
           <Row>
-            <Col span={12}>
-              <TempMap venue={venue} />
-            </Col>
+            <Col span={12}>{<Map venues={venue} isSingleLocation zoom={15} />}</Col>
             <Col span={12}>
               <LocationDetails venue={venue} />
             </Col>
           </Row>
         </div>
         <Divider />
+        <EventDetails events={events} />
         <Comments venueId={venueId} user={user} />
       </div>
     </>
