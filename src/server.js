@@ -126,20 +126,27 @@ const Venue = mongoose.model("Venue", VenueSchema);
 const Comment = mongoose.model("Comment", CommentSchema);
 
   //show all location data
-  app.get('/venue', (req, res) => {
-    Venue.find()
-    .then((data) => {
-      let venues = data.map((item, idx) => {
-        return {name: item.venueName, lat: item.lat, long: item.long, locid: item.venueId};
-      });
-      res.status(200);
-      res.send(venues);
-    })
-    .catch((err) => {
+  app.get('/venue', async (req, res) => {
+    try {
+      const data = await Venue.find();
+      const venues = [];
+  
+      for (const item of data) {
+        const count = await Event.countDocuments({ venue: item.venueId });
+        venues.push({
+          name: item.venueName,
+          lat: item.lat,
+          long: item.long,
+          locid: item.venueId,
+          eventCount: count,
+        });
+      }
+  
+      res.status(200).send(venues);
+    } catch (err) {
       console.log(err);
-      res.status(406);
-      res.send(err);
-    });
+      res.status(406).send(err);
+    }
   });
 
 //get venue details
