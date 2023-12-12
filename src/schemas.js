@@ -35,7 +35,7 @@ const EventSchema = new Schema({
   },
   //pricee
   price: {
-    type: Number,
+    type: String,
     required: true,
   },
 });
