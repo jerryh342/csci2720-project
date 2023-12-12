@@ -83,7 +83,13 @@ const LoginSchema = new Schema({
   password: { type: String, required: true },
 });
 
+const InviteSchema = new Schema({
+  event: { type: Schema.Types.ObjectId, ref: "Event", required: true },
+  users: { type: [Schema.Types.ObjectId], ref: "Login", required: true },
+});
+
 exports.EventSchema = EventSchema;
 exports.LoginSchema = LoginSchema;
 exports.CommentSchema = CommentSchema;
 exports.VenueSchema = VenueSchema;
+exports.InviteSchema = InviteSchema;
