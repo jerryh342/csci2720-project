@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import { GoogleMap, useLoadScript, MarkerF } from "@react-google-maps/api";
+import axios from "axios";
 
 function TempMap(props) {
     const libraries = ["places"];
-    const venue = props.venues;
+    const venue = props.venues; // Assume venues is an array of locations
     const { isLoaded, loadError } = useLoadScript({
       googleMapsApiKey: "AIzaSyBGGC2kgrhzogounenjJfsElrOkWmOFlM0",
       libraries,
@@ -14,8 +14,8 @@ function TempMap(props) {
       height: "100%",
     };
     const center = {
-      lat: venue[0].lat, //default lat, to be changed
-      lng: venue[0].long,
+      lat: 22.302711,
+      lng: 114.177216,
     };
     if (loadError) {
       console.log(loadError);
@@ -25,69 +25,50 @@ function TempMap(props) {
       return <div>Rendering</div>;
     }
     return (
-    <GoogleMap 
-        mapContainerStyle={mapContainerStyle} 
-        zoom={10} 
-        center={center} 
-        onDragEnd={() => props.onMove(center)}>
+      <GoogleMap mapContainerStyle={mapContainerStyle} zoom={8} center={center}>
+        {venue.map((venue, index) => 
+          <MarkerF key={index} position={{ lat: venue.lat, lng: venue.long }} />
+        )}
       </GoogleMap>
     );
   }
 
-// show all locations in a map, with links to each single location
 class Map extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      lng: this.props.long,
+      lat: this.props.lat,
+      locations: [],
+    };
+  }
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            lng: this.props.long,
-            lat: this.props.lat,
-        };
-        this.mapContainer = React.createRef();
-    }
+  componentDidMount() {
+    this.loadLocation();
+  }
 
-    //invoked for each set state(only called once => new class + new componentdidmount)
-    componentDidMount() {
-        this.LoadLocation();
-    }
+  loadLocation() {
+    axios({
+      url: "http://localhost:8000/venue",
+      method: "GET",
+    })
+    .then((r) => {    
+      this.setState({  
+        locations: r.data, // Assuming r.data is an array of locations
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
 
-    LoadLocation() {
-        axios({
-            // change the localhost to a public IP
-            url: "http://localhost:8080/venue",
-            method: "POST",
-        })
-        .then((r) => {    
-            this.setState({  
-                lng: r.venue.long,
-                lat: r.venue.lat,
-            });
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-    }
-
-    handleMove = (center) => {
-        this.setState({
-            lng: center.lng().toFixed(4),
-            lat: center.lat().toFixed(4),
-        });
-    }
-
-    render() {
-        const { lng, lat} = this.state;
-        return (
-            <div>
-                <div>
-                    Longitude:&nbsp;{lng} | Latitude:&nbsp;{lat}
-                </div>
-                <div>
-                    <TempMap lng={lng} lat={lat} onMove={this.handleMove} />
-                </div>
-            </div>
-        );
-    }
+  render() {
+    return(
+        <div>
+        <TempMap venues={this.state.locations} />
+        </div>
+    );
+  }
 }
 
 export default Map;
