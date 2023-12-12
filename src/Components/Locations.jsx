@@ -62,8 +62,6 @@ class Locations extends Component {
         title: 'Venue ID',
         dataIndex: 'locid',
         key: 'locid',
-        sorter: (a, b) => a.locid - b.locid,
-        sortDirections: ['descend', 'ascend'],
       },
       {
         title: 'Venue Name',
@@ -81,19 +79,30 @@ class Locations extends Component {
         dataIndex: 'long',
         key: 'long',
       },
+      {
+        title: 'Number of Events',
+        dataIndex: 'eventCount',
+        key: 'eventCount',
+        sorter: (a, b) => a.eventCount - b.eventCount,
+        sortDirections: ['descend', 'ascend'],
+      },
     ];
 
     return (
         <main>
-          <Input
-            size="large"
-            placeholder="Search"
-            onChange={this.searchLocation}
-            prefix={<SearchOutlined />}
-          />
-          <br />
-          <Table columns={columns} dataSource={this.state.filteredLocations} rowKey="locid" />
-          <Map venues={this.state.locationList} /> 
+          <div>
+            <Map venues={this.state.locationList} /> 
+          </div>
+          <div>
+            <Input
+              size="large"
+              placeholder="Search"
+              onChange={this.searchLocation}
+              prefix={<SearchOutlined />}
+            />
+            <br />
+            <Table columns={columns} dataSource={this.state.filteredLocations} rowKey="locid" />
+          </div>
         </main>
     );
   }
