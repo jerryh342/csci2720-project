@@ -148,6 +148,15 @@ db.once("open", function () {
     console.log("redirectted");
     res.redirect("/login");
   }
+
+  app.get("/checkUsername", (req, res)=>{
+    LoginModel.find({}).then((result) => {
+      const usernames = result.map(obj => obj.username);
+      console.log("usernames>>", usernames)
+      res.status(200).send(usernames)
+    })
+    .catch(()=>res.status(500).send("Internal Server error"));
+  })
 });
 
 const Event = mongoose.model("Event", EventSchema);

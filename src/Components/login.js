@@ -4,6 +4,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import NavBar from "./navbar";
 import 'bootstrap/dist/css/bootstrap.css';
+import ClockCircleOutlined from '@ant-design/icons/ClockCircleOutlined';
+import { useForm } from 'antd/lib/form/Form';
 
 const { Title } = Typography;
 
@@ -23,6 +25,7 @@ function setSessionStorageWithExpiration(key, value, expirationTimeInMinutes) {
   sessionStorage.setItem(key, JSON.stringify(item));
 }
 const Login = () => {
+  const [form] = useForm();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -52,7 +55,11 @@ const Login = () => {
           navigate("/home");
         }
       })
-      .catch(err=>setShowErr(true))
+      .catch(err=>{
+        console.log("reset")
+        form.resetFields();
+        setShowErr(true)
+      })
       
     } catch (error) {
       console.log("error>>", error);
@@ -90,9 +97,19 @@ const Login = () => {
             }}
             label="username"
             name="username"
+            rules={[{ required: true, message: 'Username is required' }]}
+            style={{ color: "red", textAlign: 'left' }}
+            hasFeedback
+            validateStatus={showErr ? "error" : "success"}
+            help={showErr ? "username and password not match" : ""}
           >
-            <Input type="string" onChange={handleChange} name="username" placeholder="input username" />
-            {showErr && <p style={{ color: "red", textAlign: 'left'  }}>Wrong username or password</p>}
+            <Input type="string"
+              placeholder={!formData.username ? "username is required" : "input username"}
+              name="username"
+              onChange={handleChange}
+              status={!formData.username ? "error" : ""}
+              prefix={!formData.username ? <ClockCircleOutlined /> : null}
+            />
           </Form.Item>
 
           <Form.Item
@@ -104,9 +121,18 @@ const Login = () => {
             }}
             label="password"
             name="password"
+            rules={[{ required: true, message: 'Password is required' }]}
+            style={{ color: "red", textAlign: 'left' }}
+            validateStatus={showErr ? "error" : "success"}
+            help={showErr ? "username and password not match" : ""}
           >
-            <Input.Password placeholder="input password" name="password" onChange={handleChange} />
-            {showErr && <p style={{ color: "red", textAlign: 'left'  }}>Wrong username or password</p>}
+            <Input.Password
+              placeholder={!formData.password ? "password is required" : "input password"}
+              name="password"
+              onChange={handleChange}
+              status={!formData.password ? "error" : ""}
+              prefix={!formData.password ? <ClockCircleOutlined /> : null}
+            />
           </Form.Item>
           <Button type="primary" htmlType="submit">
             Login
