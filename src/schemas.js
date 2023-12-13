@@ -1,3 +1,4 @@
+const { ObjectId } = require("bson");
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
@@ -16,7 +17,7 @@ const EventSchema = new Schema({
   venue: {
     type: Number,
     required: [true, "venue is required"],
-  },
+  },
 
   //predatee
   dateTime: {
@@ -81,12 +82,13 @@ const LoginSchema = new Schema({
   username: { type: String, required: true },
   email: { type: String, required: true },
   password: { type: String, required: true },
-  invitedEvents: { type: [Schema.Types.ObjectId], ref: "Invite", default: void 0 },
+  invitations: { type: [Schema.Types.ObjectId], ref: "Invite", default: [] },
 });
 
 const InviteSchema = new Schema({
+  eventId: { type: Number, required: true, unique: true },
   event: { type: Schema.Types.ObjectId, ref: "Event", required: true },
-  users: { type: [Schema.Types.ObjectId], ref: "login", required: true, default: void 0, unique: true },
+  users: { type: [Schema.Types.ObjectId], ref: "login", default: [] },
 });
 
 exports.EventSchema = EventSchema;

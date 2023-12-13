@@ -13,7 +13,7 @@ const CommentSchema = require("./schemas.js").CommentSchema;
 const LoginSchema = require("./schemas.js").LoginSchema;
 const InviteSchema = require("./schemas.js").InviteSchema;
 const LoginModel = mongoose.model("login", LoginSchema);
-const fetchXML = require("./fetchXML.js")
+const fetchXML = require("./fetchXML.js");
 
 const app = express();
 app.use(bodyParser.json());
@@ -65,7 +65,7 @@ db.once("open", function () {
       else {
         req.logIn(user, async (err) => {
           if (err) throw err;
-          const result = await fetchXML.getXML()
+          const result = await fetchXML.getXML();
           res.status(200).send("Successfully Authenticated");
           console.log(req.user);
         });
@@ -73,30 +73,29 @@ db.once("open", function () {
     })(req, res, next);
   });
 
-  app.get("/user", (req, res)=>{
-    LoginModel.find({})
-    .then(result=>{
-      res.json(result)
-    })
-  })
+  app.get("/user", (req, res) => {
+    LoginModel.find({}).then((result) => {
+      res.json(result);
+    });
+  });
 
-  app.get("/lcsdevents", async (req, res)=>{
+  app.get("/lcsdevents", async (req, res) => {
     try {
-      const result = await fetchXML.getXML()
-      console.log("runn>>")
+      const result = await fetchXML.getXML();
+      console.log("runn>>");
       res.set("Content-Type", "application/json");
-      res.send([result])
+      res.send([result]);
     } catch (error) {
-      console.log("error>>", error)
+      console.log("error>>", error);
     }
-  })
+  });
 
   app.post("/register", async (req, res) => {
     try {
       const { formData: values } = req.body;
       console.log("values>>", values);
       const username = values.username ? values.username : "";
-      const email = "test@cuhk.edu.hk"
+      const email = "test@cuhk.edu.hk";
       const password = values.password ? await bcrypt.hash(values.password, 10) : "";
       console.log("username>> ", username);
       console.log("email>> ", email);
@@ -114,8 +113,8 @@ db.once("open", function () {
         .then((user) => res.json(user))
         .catch((err) => res.json(err));
     } catch (error) {
-      console.log("error>>", error)
-      res.json(error)
+      console.log("error>>", error);
+      res.json(error);
     }
   });
 
@@ -277,45 +276,109 @@ app.post("/newcomment", (req, res) => {
 //update/create new invite
 app.put("/invites/update/:eventId", async (req, res) => {
   const user = await LoginModel.findOne({ username: req.body.username });
-  const invite = await Invite.findOne().populate({
-    path: "event",
-    match: { eventId: req.params.eventId },
+  let msg = "";
+  const invite = await Invite.findOne({
+    eventId: req.params.eventId,
   });
+  //found invite
   if (invite) {
-    req.body.delete ? invite.users.pull({ _id: user._id }) : invite.users.addToSet(user._id);
-    console.log(invite.users.length);
-    invite.users.length
-      ? invite.save().then(() => res.status(200).send("Updated"))
-      : Invite.findByIdAndDelete(invite._id).then(() => res.status(200).send("Empty Invite, Removed"));
-  } else {
+    //delete action
+    if (req.body.delete) {
+      invite.users.pull({ _id: user._id });
+      user.invitations.pull({ _id: invite._id });
+    } else {
+      //add user to invite
+      invite.users.addToSet(user._id);
+      user.invitations.addToSet(invite._id);
+    }
+    //save invite only if new invite.users is not empty, if empty then delete
+    if (invite.users.length !== 0) {
+      invite
+        .save()
+        .then(() => {})
+        .catch((err) => {
+          console.log(err);
+        });
+      msg = "Updated";
+    } else {
+      Invite.findByIdAndDelete(invite._id)
+        .then(() => {})
+        .catch((err) => {
+          console.log(err);
+        });
+      msg = "Empty Invite, Deleted";
+    }
+  }
+  //no invite found
+  else {
+    //create 1 if not delete (maybe can remove by deleting button)
     if (!req.body.delete) {
       const userArray = [];
       const event = await Event.findOne({ eventId: req.params.eventId });
       userArray.push(user._id);
       console.log(userArray);
-      Invite.create({
+      const newInvite = new Invite({
+        eventId: req.params.eventId,
         event: event._id,
         users: userArray,
-      })
-        .then(() => res.status(200).send("New Invite Created"))
-        .catch((err) => res.status(500).send(err));
+      });
+      newInvite
+        .save()
+        .then(() => {
+          user.invitations.addToSet(newInvite._id);
+        })
+        .catch((err) => console.log(err));
+      msg = "New invitation created";
     } else {
       res.status(406).send("Cannot delete!");
+      return null;
     }
+  }
+  //save new user info
+  user
+    .save()
+    .then(() => {
+      res.status(200).send(msg);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+//get event invite for 1 user
+app.post("/invites/user", async (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  if (req.body.username) {
+    const user = await LoginModel.findOne({ username: req.body.username });
+    Invite.find({ users: user._id })
+      .populate([
+        {
+          path: "users",
+        },
+        {
+          path: "event",
+        },
+      ])
+      .then((data) => {
+        res.status(200).send(data);
+      })
+      .catch((err) => {
+        res.status(404).send(err);
+      });
+  } else {
+    res.status(400).send("No username provided");
   }
 });
 
 //Get event invite for 1 event
-app.post("/invites/:eventId", (req, res) => {
+app.post("/invites/:eventId", async (req, res) => {
   res.setHeader("Content-Type", "application/json");
-  Invite.findOne({})
+  Invite.find({ eventId: req.params.eventId })
     .populate([
       {
         path: "users",
       },
       {
         path: "event",
-        match: { eventId: req.params.eventId },
       },
     ])
     .then((data) => {
@@ -330,6 +393,14 @@ app.post("/invites/:eventId", (req, res) => {
 app.get("/invites", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   Invite.find()
+    .populate([
+      {
+        path: "users",
+      },
+      {
+        path: "event",
+      },
+    ])
     .then((data) => {
       res.status(200).send(data);
     })
