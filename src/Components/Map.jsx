@@ -46,12 +46,3 @@ function Map(props) {
   );
 }
 export default Map;
-
-
-{/* <GoogleMap mapContainerStyle={mapContainerStyle} zoom={props.zoom ? props.zoom : 10} center={defaultCenter}>
-{Array.isArray(venues) ? (
-  venues.map((item, idx) => <MarkerF position={{ lat: item.lat, lng: item.long }} key={idx} />)
-) : (
-  <MarkerF position={{ lat: venues.lat, lng: venues.long }} key={0} />
-)}
-</GoogleMap> */}
