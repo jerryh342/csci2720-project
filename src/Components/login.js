@@ -10,6 +10,18 @@ const { Title } = Typography;
 const onFinishFailed = (errorInfo) => {
   console.log("Failed:", errorInfo);
 };
+function setSessionStorageWithExpiration(key, value, expirationTimeInMinutes) {
+  const expirationMs = expirationTimeInMinutes * 60 * 1000; // Convert minutes to milliseconds
+  const now = new Date().getTime();
+  const expirationTime = now + expirationMs;
+
+  const item = {
+    value: value,
+    expirationTime: expirationTime,
+  };
+
+  sessionStorage.setItem(key, JSON.stringify(item));
+}
 const Login = () => {
   const [formData, setFormData] = useState({
     username: "",
@@ -32,6 +44,15 @@ const Login = () => {
         withCredentials: true,
         url: "http://localhost:8000/login",
       })
+        .then(async (res) => {
+          console.log("res>>", res);
+          if (res.status == 200) {
+            console.log("res.data>>", res.data);
+            setSessionStorageWithExpiration("username", res.data.username, 120);
+            //expire after 2 hrs
+            navigate("/home");
+          }
+        })
         .then(async (res) => {
           console.log("res>>", res);
           if (res.status == 200) {
