@@ -3,6 +3,7 @@ import axios from "axios";
 import { Table, Input } from 'antd';
 import { SearchOutlined} from '@ant-design/icons';
 import Map from './Map';
+import NavBar from "./navbar";
 
 class Locations extends Component {
   constructor(props) {
@@ -88,6 +89,9 @@ class Locations extends Component {
 
     return (
         <main>
+          <div>
+            <NavBar />
+          </div>
           <div>
             <Input
               size="large"

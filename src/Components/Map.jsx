@@ -7,9 +7,11 @@ const libraries = ["places"];
 function Map(props) {
   //props: venues (array), isSingleLocation (bool), zoom (Number)
   const venues = props.venues;
+  const markerLink = props.markerLink;
+  const navi =  useNavigate();
   const defaultCenter = {
-    lat: props.isSingleLocation ? venues.lat : 22.3529584,
-    lng: props.isSingleLocation ? venues.long : 113.974591,
+    lat: props.isSingleLocation ? venues.lat : 22.3729584,
+    lng: props.isSingleLocation ? venues.long : 114.177216,
   };
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: "AIzaSyBGGC2kgrhzogounenjJfsElrOkWmOFlM0",
@@ -29,11 +31,27 @@ function Map(props) {
   return (
     <GoogleMap mapContainerStyle={mapContainerStyle} zoom={props.zoom ? props.zoom : 10} center={defaultCenter}>
       {Array.isArray(venues) ? (
-        venues.map((item, idx) => <MarkerF position={{ lat: item.lat, lng: item.long }} key={idx} />)
+      venues.map((item, idx) => markerLink ? (
+      <MarkerF 
+        position={{ lat: item.lat, lng: item.long }} 
+        key={idx} 
+        onClick={() => markerLink && navi(`/venue/${item.locid}`)}
+        />
       ) : (
-        <MarkerF position={{ lat: venues.lat, lng: venues.long }} key={0} />
-      )}
-    </GoogleMap>
+      <MarkerF position={{ lat: item.lat, lng: item.long }} key={idx} />)))
+      : (
+      <MarkerF position={{ lat: venues.lat, lng: venues.long }} key={0} />
+    )}
+  </GoogleMap> 
   );
 }
 export default Map;
+
+
+{/* <GoogleMap mapContainerStyle={mapContainerStyle} zoom={props.zoom ? props.zoom : 10} center={defaultCenter}>
+{Array.isArray(venues) ? (
+  venues.map((item, idx) => <MarkerF position={{ lat: item.lat, lng: item.long }} key={idx} />)
+) : (
+  <MarkerF position={{ lat: venues.lat, lng: venues.long }} key={0} />
+)}
+</GoogleMap> */}

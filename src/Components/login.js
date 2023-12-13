@@ -33,13 +33,14 @@ const Login = () => {
         url: "http://localhost:8000/login",
       }).then(async (res) => {
         console.log("res>>", res);
-        if (res.data === "Password or Username dont match") {
-          setShowErr(true);
-        }
-        if (res.data === "Successfully Authenticated") {
+        if (res.status == 200) {
+          console.log("res.data>>", res.data)
+          sessionStorage.setItem('login',`{username: ${res.data.username}}`)
           navigate("/home");
         }
-      });
+      })
+      .catch(err=>setShowErr(true))
+      
     } catch (error) {
       console.log("error>>", error);
     }
