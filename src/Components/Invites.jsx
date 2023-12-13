@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Card, Descriptions, Button, Form, Input, Alert, List } from "antd";
+import NavBar from "./navbar";
+function getUsername() {
+  const item = JSON.parse(sessionStorage.getItem("username"));
+  return item.value;
+}
 
 function Invite(props) {
   const [invite, setInvite] = useState(props.invite);
@@ -27,7 +32,7 @@ function Invite(props) {
       url: "http://localhost:8000/invites/user",
       method: "POST",
       data: {
-        username: "admin", //TODO: get current user
+        username: getUsername(), //TODO: get current user
       },
     })
       .then((res) => {
@@ -40,7 +45,7 @@ function Invite(props) {
   }
   function handleClick() {
     let payload = {
-      username: "admin",
+      username: getUsername(),
       delete: isJoined ? true : false,
     };
     axios({
@@ -115,7 +120,7 @@ function NewInviteForm(props) {
           url: "http://localhost:8000/invites/create/" + data.eventId,
           method: "PUT",
           data: {
-            username: "admin",
+            username: getUsername(),
           },
         })
           .then((res) => {
@@ -199,6 +204,7 @@ function Invites(props) {
 
   return (
     <>
+      <NavBar></NavBar>
       <h1>Invites</h1>
 
       <Card title={"Create a new Event Invite!"}>
