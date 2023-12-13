@@ -4,7 +4,6 @@ import axios from "axios";
 import NavBar from "./navbar";
 import Map from "./Map";
 import { useParams } from "react-router-dom";
-import { GoogleMap, useLoadScript, MarkerF } from "@react-google-maps/api";
 const { TextArea } = Input;
 
 function LocationDetails(props) {
@@ -235,19 +234,19 @@ function SingleLocation(props) {
   useEffect(() => {
     getLocationDetails();
     getVenueEvents();
-    //getCurrentUser();
-    setUser("admin");
+    getCurrentUser();
+    //setUser("admin"); //TODO: get current user
   }, []);
 
   return (
     <>
-      <div>{/*<NavBar></NavBar>*/}</div>
+      <div>{<NavBar></NavBar>}</div>
       <div>
         <h1>{venue.venueName}</h1>
         <Divider />
         <div>
           <Row>
-            <Col span={12}>{<Map venues={venue} zoom={10} isSingleLocation />}</Col>
+            <Col span={12}>{<Map venues={venue} zoom={15} isSingleLocation />}</Col>
             <Col span={12}>
               <LocationDetails venue={venue} />
             </Col>

@@ -36,7 +36,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 require("./passportConfig")(passport);
 
-// mongoose.connect('mongodb://127.0.0.1:27017/project'); 
+// mongoose.connect('mongodb://127.0.0.1:27017/project');
 mongoose.connect("mongodb+srv://admin:admin@csci2720proj.pqtx7pq.mongodb.net/?retryWrites=true&w=majority"); // put your own database link here
 
 const db = mongoose.connection;
@@ -218,11 +218,8 @@ const Invite = mongoose.model("Invite", InviteSchema);
 
 app.get("/venue/:venueId/ev", (req, res) => {
   res.setHeader("Content-Type", "application/json");
-  Event.find()
-    .populate({
-      path: "venue",
-      match: { venueId: req.params.venueId },
-    })
+  console.log(req.params.venueId);
+  Event.find({ venue: req.params.venueId })
     .then((data) => {
       console.log(data);
       res.status(200).send(data);
@@ -335,10 +332,10 @@ app.post("/newcomment", (req, res) => {
       res.status(404).send(err);
     });
 });
-//update/create new invite
+//update invite
 app.put("/invites/update/:eventId", async (req, res) => {
   const user = await LoginModel.findOne({ username: req.body.username });
-  let msg = "";
+  let msg;
   const invite = await Invite.findOne({
     eventId: req.params.eventId,
   });
@@ -346,8 +343,12 @@ app.put("/invites/update/:eventId", async (req, res) => {
   if (invite) {
     //delete action
     if (req.body.delete) {
-      invite.users.pull({ _id: user._id });
-      user.invitations.pull({ _id: invite._id });
+      try {
+        invite.users.pull({ _id: user._id });
+        user.invitations.pull({ _id: invite._id });
+      } catch (err) {
+        console.log(err);
+      }
     } else {
       //add user to invite
       invite.users.addToSet(user._id);
@@ -360,81 +361,98 @@ app.put("/invites/update/:eventId", async (req, res) => {
         .then(() => {})
         .catch((err) => {
           console.log(err);
+          console.log("test");
         });
-      msg = "Updated";
+      msg = invite;
     } else {
       Invite.findByIdAndDelete(invite._id)
         .then(() => {})
         .catch((err) => {
           console.log(err);
         });
-      msg = "Empty Invite, Deleted";
+      msg = null;
     }
-  }
-  //no invite found
-  else {
-    //create 1 if not delete (maybe can remove by deleting button)
-    if (!req.body.delete) {
-      const userArray = [];
-      const event = await Event.findOne({ eventId: req.params.eventId });
-      userArray.push(user._id);
-      console.log(userArray);
-      const newInvite = new Invite({
-        eventId: req.params.eventId,
-        event: event._id,
-        users: userArray,
+    user
+      .save()
+      .then(() => {
+        res.status(200).send(null);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(403).send(err);
       });
-      newInvite
-        .save()
-        .then(() => {
-          user.invitations.addToSet(newInvite._id);
-        })
-        .catch((err) => console.log(err));
-      msg = "New invitation created";
-    } else {
-      res.status(406).send("Cannot delete!");
-      return null;
-    }
+  } else {
+    res.status(404).send("Not found");
   }
-  //save new user info
-  user
-    .save()
-    .then(() => {
-      res.status(200).send(msg);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
 });
+//create new invite
+app.put("/invites/create/:eventId", async (req, res) => {
+  const user = await LoginModel.findOne({ username: req.body.username });
+  const invite = await Invite.findOne({ eventId: req.params.eventId });
+  if (!invite) {
+    const userArray = [];
+    const event = await Event.findOne({ eventId: req.params.eventId });
+    userArray.push(user._id);
+    console.log(userArray);
+    const newInvite = new Invite({
+      eventId: req.params.eventId,
+      event: event._id,
+      users: userArray,
+    });
+    newInvite
+      .save()
+      .then(() => {
+        user.invitations.addToSet(newInvite._id);
+      })
+      .catch((err) => console.log(err));
+    user
+      .save()
+      .then(() => {
+        res.status(200).send(null);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(403).send(err);
+      });
+  } else {
+    res.status(400).send("Existing Invite!");
+  }
+});
+//create 1 if not delete (maybe can remove by deleting button)
+
 //get event invite for 1 user
 app.post("/invites/user", async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   if (req.body.username) {
     const user = await LoginModel.findOne({ username: req.body.username });
-    Invite.find({ users: user._id })
-      .populate([
-        {
-          path: "users",
-        },
-        {
-          path: "event",
-        },
-      ])
-      .then((data) => {
-        res.status(200).send(data);
-      })
-      .catch((err) => {
-        res.status(404).send(err);
-      });
+    try {
+      Invite.find({ users: user._id })
+        .populate([
+          {
+            path: "users",
+          },
+          {
+            path: "event",
+          },
+        ])
+        .then((data) => {
+          res.status(200).send(data);
+        })
+        .catch((err) => {
+          res.status(404).send(err);
+        });
+    } catch (err) {
+      console.log(err);
+    }
   } else {
     res.status(400).send("No username provided");
   }
 });
 
 //Get event invite for 1 event
-app.post("/invites/:eventId", async (req, res) => {
+app.get("/invites/:eventId", async (req, res) => {
   res.setHeader("Content-Type", "application/json");
-  Invite.find({ eventId: req.params.eventId })
+  Invite.findOne({ eventId: req.params.eventId })
     .populate([
       {
         path: "users",

@@ -8,18 +8,6 @@ import NavBar from "./navbar";
 function Home() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const logOut = () => {
-    axios({
-      method: "DELETE",
-      url: "http://localhost:8000/logout",
-      withCredentials: true,
-    })
-      .then(setIsLoggedIn(true))
-      .catch((err) => {
-        setIsLoggedIn(false);
-        return navigate("/login");
-      });
-  };
   useEffect(() => {
     const getLoggedIn = () => {
       try {

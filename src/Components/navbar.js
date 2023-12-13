@@ -44,9 +44,8 @@ const NavBar = () => {
       url: "http://localhost:8000/logout",
       withCredentials: true,
     })
-      .then(setIsLoggedIn(true))
+      .then(()=>sessionStorage.removeItem('user'))
       .catch((err) => {
-        setIsLoggedIn(false);
         return navigate("/login");
       });
   };
