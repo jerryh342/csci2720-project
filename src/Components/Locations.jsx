@@ -31,9 +31,11 @@ class Locations extends Component {
       method: "GET",
     })
       .then((r) => {
+        const filteredData = r.data.filter((v) => v.eventCount > 3);
+        const slicedData = filteredData.slice(0, 10);
         this.setState({
-          locationList: r.data,
-          filteredLocations: r.data,
+          locationList: slicedData,
+          filteredLocations: slicedData,
         });
         this.setState({ isLoadingData: false });
       })
@@ -94,17 +96,18 @@ class Locations extends Component {
         <div>
           <NavBar />
         </div>
-        <div>
-          <Input size="large" placeholder="Search" onChange={this.searchLocation} prefix={<SearchOutlined />} />
-        </div>
         <div style={{ height: "500px", width: "100%" }}>
           {<Map venues={this.state.locationList} isSingleLocation={false} zoom={11} markerLink={true} />}
+        </div>
+        <div>
+          <Input size="large" placeholder="Search" onChange={this.searchLocation} prefix={<SearchOutlined />} />
         </div>
         <div>
           <Table
             columns={columns}
             dataSource={this.state.filteredLocations}
             loading={this.state.isLoadingData}
+            pagination={false}
             rowKey="locid"
           />
         </div>
