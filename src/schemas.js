@@ -14,10 +14,9 @@ const EventSchema = new Schema({
   },
   //venueid
   venue: {
-    type: Schema.Types.ObjectId,
-    ref: "Venue",
-    required: true,
-  },
+    type: Number,
+    required: [true, "venue is required"],
+  },
   //predatee
   dateTime: {
     type: String,
