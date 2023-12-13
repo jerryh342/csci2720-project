@@ -13,108 +13,59 @@ const db = mongoose.connection;
 // Upon connection failure
 db.on("error", console.error.bind(console, "Connection error:"));
 
-const getXML = async () =>{
-    const parser = new xml2js.Parser()
-    try {
-        const eventsResponse = await axios.get('https://www.lcsd.gov.hk/datagovhk/event/events.xml');
-        const venuesResponse = await axios.get('https://www.lcsd.gov.hk/datagovhk/event/venues.xml');
-        let event, venue
-        const eventsResult = await parser.parseString(eventsResponse.data, (err, result)=>{
-            event = result.events.event        
-        })
-        const locsResult = await parser.parseString(venuesResponse.data, (err, result)=>{
-           console.log("result>>", result.venues.venue)    
-           venue=result.venues.venue
-        })
-       
-        const filteredAndMappedVenue = venue.filter(i =>
-            i.venuee[0] !== '' && i.latitude[0] !== '' && i.longitude[0] !== '' && i.$.id !== ''
-        )
-            .map(i => ({
-            venueId: parseInt(i.$.id),
-            venueName: i.venuee[0],
-            lat: parseFloat(i.latitude[0]),
-            long: parseFloat(i.longitude[0])
-            }));
 
-        console.log("filteredAndMappedVenue>>", filteredAndMappedVenue)
-        // Venue.create(filteredAndMappedVenue)
-        //     .then((ven) => console.log("ven>>", ven))
-        //     .catch((err) => console.log("err>>", err));
 
-        const locationDict = {}
-        for (i of event) {
-            if (i.presenterorge[0] !== '' && i.titlee[0] !== '' && i.pricee[0] !== '' && i.predateE[0] !== '' && i.venueid[0] !="" && i.desce[0] !="" && i.$.id[0]!="") {
-                locationDict[i.venueid[0]]=(locationDict[i.venueid[0]] || 0) + 1;
-            }
-        }
-        // console.log("loc>>", )
-        const filteredArray = event.filter(item => locationDict[item.venueid] >= 3)
-        .slice(0, 10)
-        .map(item => ({
-            eventId: item.$.id,
-            title: item.titlee[0],
-            venue: parseInt(item.venueid[0]),
-            dateTime: item.predateE[0],
-            desc: item.desce[0],
-            presenter: item.presenterorge[0],
-            price: item.pricee[0],                
-          })); 
-        //   Event.create(filteredArray)
-        //   .then((ven) => console.log("ven>>", ven))
-        //   .catch((err) => console.log("err>>", err));
-          
-          const getXML = async () =>{
-    const parser = new xml2js.Parser()
-    try {
-        const eventsResponse = await axios.get('https://www.lcsd.gov.hk/datagovhk/event/events.xml');
-        const venuesResponse = await axios.get('https://www.lcsd.gov.hk/datagovhk/event/venues.xml');
-        let event, venue
-        const eventsResult = await parser.parseString(eventsResponse.data, (err, result)=>{
-            event = result.events.event        
-        })
-        const locsResult = await parser.parseString(venuesResponse.data, (err, result)=>{
-           console.log("result>>", result.venues.venue)    
-           venue=result.venues.venue
-        })
-       
-        const filteredAndMappedVenue = venue.filter(i =>
-            i.venuee[0] !== '' && i.latitude[0] !== '' && i.longitude[0] !== '' && i.$.id !== ''
-        )
-            .map(i => ({
-            venueId: parseInt(i.$.id),
-            venueName: i.venuee[0],
-            lat: parseFloat(i.latitude[0]),
-            long: parseFloat(i.longitude[0])
-            }));
+const getXML = async () => {
+  const parser = new xml2js.Parser()
+  try {
+    const eventsResponse = await axios.get('https://www.lcsd.gov.hk/datagovhk/event/events.xml');
+    const venuesResponse = await axios.get('https://www.lcsd.gov.hk/datagovhk/event/venues.xml');
+    let event, venue
+    const eventsResult = await parser.parseString(eventsResponse.data, (err, result) => {
+      event = result.events.event
+    })
+    const locsResult = await parser.parseString(venuesResponse.data, (err, result) => {
+      console.log("result>>", result.venues.venue)
+      venue = result.venues.venue
+    })
 
-        console.log("filteredAndMappedVenue>>", filteredAndMappedVenue)
-        // Venue.create(filteredAndMappedVenue)
-        //     .then((ven) => console.log("ven>>", ven))
-        //     .catch((err) => console.log("err>>", err));
+    const filteredAndMappedVenue = venue.filter(i =>
+      i.venuee[0] !== '' && i.latitude[0] !== '' && i.longitude[0] !== '' && i.$.id !== ''
+    )
+      .map(i => ({
+        venueId: parseInt(i.$.id),
+        venueName: i.venuee[0],
+        lat: parseFloat(i.latitude[0]),
+        long: parseFloat(i.longitude[0])
+      }));
 
-        const locationDict = {}
-        for (i of event) {
-            if (i.presenterorge[0] !== '' && i.titlee[0] !== '' && i.pricee[0] !== '' && i.predateE[0] !== '' && i.venueid[0] !="" && i.desce[0] !="" && i.$.id[0]!="") {
-                locationDict[i.venueid[0]]=(locationDict[i.venueid[0]] || 0) + 1;
-            }
-        }
-        // console.log("loc>>", )
-        const filteredArray = event.filter(item => locationDict[item.venueid] >= 3)
-        .slice(0, 10)
-        .map(item => ({
-            eventId: item.$.id,
-            title: item.titlee[0],
-            venue: parseInt(item.venueid[0]),
-            dateTime: item.predateE[0],
-            desc: item.desce[0],
-            presenter: item.presenterorge[0],
-            price: item.pricee[0],                
-          })); 
-        //   Event.create(filteredArray)
-        //   .then((ven) => console.log("ven>>", ven))
-        //   .catch((err) => console.log("err>>", err));
-        // Retrieve existing event and venue data from the database
+    console.log("filteredAndMappedVenue>>", filteredAndMappedVenue)
+    // Venue.create(filteredAndMappedVenue)
+    //     .then((ven) => console.log("ven>>", ven))
+    //     .catch((err) => console.log("err>>", err));
+
+    const locationDict = {}
+    for (i of event) {
+      if (i.presenterorge[0] !== '' && i.titlee[0] !== '' && i.pricee[0] !== '' && i.predateE[0] !== '' && i.venueid[0] != "" && i.desce[0] != "" && i.$.id[0] != "") {
+        locationDict[i.venueid[0]] = (locationDict[i.venueid[0]] || 0) + 1;
+      }
+    }
+    // console.log("loc>>", )
+    const filteredArray = event.filter(item => locationDict[item.venueid] >= 3)
+      .slice(0, 10)
+      .map(item => ({
+        eventId: item.$.id,
+        title: item.titlee[0],
+        venue: parseInt(item.venueid[0]),
+        dateTime: item.predateE[0],
+        desc: item.desce[0],
+        presenter: item.presenterorge[0],
+        price: item.pricee[0],
+      }));
+    //   Event.create(filteredArray)
+    //   .then((ven) => console.log("ven>>", ven))
+    //   .catch((err) => console.log("err>>", err));
+    // Retrieve existing event and venue data from the database
 
     const existingEvents = await Event.find();
     const existingVenues = await Venue.find();
@@ -149,24 +100,16 @@ const getXML = async () =>{
     }
     console.log("filteredArray>>", filteredArray)
     return filteredArray;
-        
-      
-    } catch (error) {
-        console.log("error>>", error)
-        return error
-    }
-    
+
+
+  } catch (error) {
+    console.log("error>>", error)
+    return error
+  }
+
 
 }
-        
-      
-    } catch (error) {
-        console.log("error>>", error)
-        return error
-    }
-    
 
-}
-module.exports ={
-    getXML,
+module.exports = {
+  getXML,
 }
