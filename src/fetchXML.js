@@ -6,8 +6,8 @@ const VenueSchema = require("./schemas.js").VenueSchema;
 const Event = mongoose.model("Event", EventSchema);
 const Venue = mongoose.model("Venue", VenueSchema);
 
-mongoose.connect('mongodb://127.0.0.1:27017/project'); 
-// mongoose.connect("mongodb+srv://admin:admin@csci2720proj.pqtx7pq.mongodb.net/?retryWrites=true&w=majority"); // put your own database link here
+// mongoose.connect('mongodb://127.0.0.1:27017/project'); 
+mongoose.connect("mongodb+srv://admin:admin@csci2720proj.pqtx7pq.mongodb.net/?retryWrites=true&w=majority"); // put your own database link here
 
 const db = mongoose.connection;
 // Upon connection failure
