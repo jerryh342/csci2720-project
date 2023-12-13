@@ -364,21 +364,25 @@ app.post("/invites/user", async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   if (req.body.username) {
     const user = await LoginModel.findOne({ username: req.body.username });
-    Invite.find({ users: user._id })
-      .populate([
-        {
-          path: "users",
-        },
-        {
-          path: "event",
-        },
-      ])
-      .then((data) => {
-        res.status(200).send(data);
-      })
-      .catch((err) => {
-        res.status(404).send(err);
-      });
+    try {
+      Invite.find({ users: user._id })
+        .populate([
+          {
+            path: "users",
+          },
+          {
+            path: "event",
+          },
+        ])
+        .then((data) => {
+          res.status(200).send(data);
+        })
+        .catch((err) => {
+          res.status(404).send(err);
+        });
+    } catch (err) {
+      console.log(err);
+    }
   } else {
     res.status(400).send("No username provided");
   }
