@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { GoogleMap, useLoadScript, MarkerF } from "@react-google-maps/api";
 import { Navigate, useNavigate } from "react-router-dom";
-import { use } from "passport";
 
 const libraries = ["places"];
 
