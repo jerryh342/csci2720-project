@@ -1,15 +1,19 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { GoogleMap, useLoadScript, MarkerF } from "@react-google-maps/api";
+import { Navigate, useNavigate } from 'react-router-dom';
+import { use } from "passport";
+
 
 const libraries = ["places"];
 
 function Map(props) {
-//props: venues (array), isSingleLocation (bool), zoom (Number)
+//props: venues (array), isSingleLocation (bool), zoom (Number), markerLink (bool)
 const venues = props.venues;
+// const markerLink = props.markerLink;
 const defaultCenter = {
-lat: props.isSingleLocation ? venues.lat : 22.3529584,
-lng: props.isSingleLocation ? venues.long : 113.974591,
+lat: props.isSingleLocation ? venues.lat : 22.3729584,
+lng: props.isSingleLocation ? venues.long : 114.177216,
 };
 const { isLoaded, loadError } = useLoadScript({
 googleMapsApiKey: "AIzaSyBGGC2kgrhzogounenjJfsElrOkWmOFlM0",
@@ -33,7 +37,24 @@ venues.map((item, idx) => <MarkerF position={{ lat: item.lat, lng: item.long }} 
 ) : (
 <MarkerF position={{ lat: venues.lat, lng: venues.long }} key={0} />
 )}
-</GoogleMap>
+</GoogleMap> 
 );
 }
 export default Map;
+
+
+{/* <GoogleMap mapContainerStyle={mapContainerStyle} zoom={props.zoom ? props.zoom : 10} center={defaultCenter}>
+{Array.isArray(venues) ? (
+  venues.map((item, idx) => markerLink ? (
+    <MarkerF 
+      position={{ lat: item.lat, lng: item.long }} 
+      key={idx} 
+      onClick={() => markerLink && navigate(`/venue/${venues.venueId}`)}
+      />
+  ) : (
+    <MarkerF position={{ lat: item.lat, lng: item.long }} key={idx} />
+  ))
+) : (
+  <MarkerF position={{ lat: venues.lat, lng: venues.long }} key={0} />
+)}
+</GoogleMap> */}
