@@ -17,6 +17,7 @@ const EventSchema = new Schema({
     type: Number,
     required: [true, "venue is required"],
   },
+
   //predatee
   dateTime: {
     type: String,

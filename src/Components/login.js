@@ -1,14 +1,11 @@
 import React, { useState } from "react";
-// import { Button, Checkbox, Form, Input, Typography  } from 'antd';
+import { Button, Checkbox, Form, Input, Typography, Col, Row, Space } from 'antd';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import Container from "react-bootstrap/Container";
-import "bootstrap/dist/css/bootstrap.css";
 import NavBar from "./navbar";
+import 'bootstrap/dist/css/bootstrap.css';
 
-// const {Title} = Typography;
+const { Title } = Typography;
 
 const onFinishFailed = (errorInfo) => {
   console.log("Failed:", errorInfo);
@@ -16,15 +13,14 @@ const onFinishFailed = (errorInfo) => {
 const Login = () => {
   const [formData, setFormData] = useState({
     username: "",
-    email: "",
+    password: "",
   });
-  const [showisLoggedIn, setshowisLoggedIn] = useState(false);
+  const [showErr, setShowErr] = useState(false);
   const navigate = useNavigate();
   const handleChange = (event) => {
     setFormData({ ...formData, [event.target.name]: event.target.value });
   };
   const handleSubmit = async (event) => {
-    event.preventDefault();
     console.log("formData>>", formData);
     try {
       axios({
@@ -38,7 +34,7 @@ const Login = () => {
       }).then(async (res) => {
         console.log("res>>", res);
         if (res.data === "Password or Username dont match") {
-          setshowisLoggedIn(true);
+          setShowErr(true);
         }
         if (res.data === "Successfully Authenticated") {
           navigate("/home");
@@ -51,22 +47,60 @@ const Login = () => {
   return (
     <>
       <NavBar />
-      <Container className="d-flex justify-content-center align-items-center vh-100">
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3" controlId="formBasicUsername">
-            <Form.Label>Username</Form.Label>
-            <Form.Control type="text" name="username" placeholder="username" onChange={handleChange} />
-          </Form.Group>
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 100}}>
+        <Form
+          name="basic"
+          labelCol={{
+            span: 6
+          }}
+          wrapperCol={{
+            span: 12
+          }}
+          style={{
+            width: "50%",
+            alignContent: "center"
+          }}
+          initialValues={{
+            remember: true,
+          }}
+          onFinish={handleSubmit}
+          onFinishFailed={onFinishFailed}
+          autoComplete="off"
+        >
+          <Form.Item
+            labelCol={{
+              span: 6
+            }}
+            wrapperCol={{
+              span: 12
+            }}
+            label="username"
+            name="username"
+          >
+            <Input type="string" onChange={handleChange} name="username" placeholder="input username" />
+            {showErr && <p style={{ color: "red", textAlign: 'left'  }}>Wrong username or password</p>}
+          </Form.Item>
 
-          <Form.Group className="mb-3" controlId="formBasicPassword">
-            <Form.Label>Password</Form.Label>
-            <Form.Control type="password" name="password" placeholder="Password" onChange={handleChange} />
-          </Form.Group>
-          <Button variant="primary" type="submit">
-            Submit
+          <Form.Item
+            labelCol={{
+              span: 6
+            }}
+            wrapperCol={{
+              span: 12
+            }}
+            label="password"
+            name="password"
+          >
+            <Input.Password placeholder="input password" name="password" onChange={handleChange} />
+            {showErr && <p style={{ color: "red", textAlign: 'left'  }}>Wrong username or password</p>}
+          </Form.Item>
+          <Button type="primary" htmlType="submit">
+            Login
           </Button>
         </Form>
-      </Container>
+      </div>
+
+
     </>
   );
 };

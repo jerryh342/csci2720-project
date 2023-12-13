@@ -9,11 +9,14 @@ module.exports = function (passport) {
     new localStrategy((username, password, done) => {
       LoginModel.findOne({ username: username })
         .then((user) => {
-          if (!user) return done(null, false);
+          if (!user) {
+            console.log("user not found")
+            return done(null, false);}
           return bcrypt.compare(password, user.password).then((result) => {
             if (result) {
               return done(null, user);
             } else {
+              console.log("pw not match")
               return done(null, false);
             }
           });

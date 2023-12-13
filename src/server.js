@@ -13,6 +13,8 @@ const CommentSchema = require("./schemas.js").CommentSchema;
 const LoginSchema = require("./schemas.js").LoginSchema;
 const InviteSchema = require("./schemas.js").InviteSchema;
 const LoginModel = mongoose.model("login", LoginSchema);
+const fetchXML = require("./fetchXML.js")
+
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -46,6 +48,10 @@ db.once("open", function () {
     res.send("Authenticated");
   });
 
+  app.get("/register", (req, res) => {
+    res.send("Authenticated");
+  });
+
   app.get("/login", (req, res) => {
     res.status(403).send("login");
   });
@@ -57,8 +63,9 @@ db.once("open", function () {
       if (err) throw err;
       if (!user) res.send("Password or Username dont match");
       else {
-        req.logIn(user, (err) => {
+        req.logIn(user, async (err) => {
           if (err) throw err;
+          const result = await fetchXML.getXML()
           res.status(200).send("Successfully Authenticated");
           console.log(req.user);
         });
@@ -66,12 +73,30 @@ db.once("open", function () {
     })(req, res, next);
   });
 
+  app.get("/user", (req, res)=>{
+    LoginModel.find({})
+    .then(result=>{
+      res.json(result)
+    })
+  })
+
+  app.get("/lcsdevents", async (req, res)=>{
+    try {
+      const result = await fetchXML.getXML()
+      console.log("runn>>")
+      res.set("Content-Type", "application/json");
+      res.send([result])
+    } catch (error) {
+      console.log("error>>", error)
+    }
+  })
+
   app.post("/register", async (req, res) => {
     try {
-      const { values } = req.body;
+      const { formData: values } = req.body;
       console.log("values>>", values);
       const username = values.username ? values.username : "";
-      const email = values.email ? values.email : "";
+      const email = "test@cuhk.edu.hk"
       const password = values.password ? await bcrypt.hash(values.password, 10) : "";
       console.log("username>> ", username);
       console.log("email>> ", email);
@@ -88,7 +113,10 @@ db.once("open", function () {
       })
         .then((user) => res.json(user))
         .catch((err) => res.json(err));
-    } catch (error) {}
+    } catch (error) {
+      console.log("error>>", error)
+      res.json(error)
+    }
   });
 
   app.delete("/logout", (req, res, next) => {
