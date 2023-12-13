@@ -11,6 +11,7 @@ const EventSchema = require("./schemas.js").EventSchema;
 const VenueSchema = require("./schemas.js").VenueSchema;
 const CommentSchema = require("./schemas.js").CommentSchema;
 const LoginSchema = require("./schemas.js").LoginSchema;
+const InviteSchema = require("./schemas.js").InviteSchema;
 const LoginModel = mongoose.model("login", LoginSchema);
 const app = express();
 app.use(bodyParser.json());
@@ -124,24 +125,24 @@ db.once("open", function () {
 const Event = mongoose.model("Event", EventSchema);
 const Venue = mongoose.model("Venue", VenueSchema);
 const Comment = mongoose.model("Comment", CommentSchema);
+const Invite = mongoose.model("Invite", InviteSchema);
 
-  //show all location data
-  app.get('/venue', (req, res) => {
-    Venue.find()
+app.get("/venue/:venueId/ev", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  Event.find()
+    .populate({
+      path: "venue",
+      match: { venueId: req.params.venueId },
+    })
     .then((data) => {
-      let venues = data.map((item, idx) => {
-        return {name: item.venueName, lat: item.lat, long: item.long, locid: item.venueId};
-      });
-      res.status(200);
-      res.send(venues);
+      console.log(data);
+      res.status(200).send(data);
     })
     .catch((err) => {
-      console.log(err);
-      res.status(406);
-      res.send(err);
+      res.status(404);
+      res.send("Venue not found");
     });
-  });
-
+});
 //get venue details
 app.get("/venue/:venueId", (req, res) => {
   res.setHeader("Content-Type", "application/json");
@@ -161,26 +162,25 @@ app.get("/venue/:venueId", (req, res) => {
       res.send("Venue not found");
     });
 });
-
-app.get("/venue/:venueId/ev", (req, res) => {
-  res.setHeader("Content-Type", "application/json");
-  Event.find()
-    .populate({
-      path: "venue",
-      match: { venueId: req.params.venueId },
-    })
+//show all location data
+app.get("/venue", (req, res) => {
+  Venue.find()
     .then((data) => {
-      console.log(data);
-      res.status(200).send(data);
+      let venues = data.map((item, idx) => {
+        return { name: item.venueName, lat: item.lat, long: item.long, locid: item.venueId };
+      });
+      res.status(200);
+      res.send(venues);
     })
     .catch((err) => {
-      res.status(404);
-      res.send("Venue not found");
+      console.log(err);
+      res.status(406);
+      res.send(err);
     });
 });
+
 // get comments
 app.get("/comments/:venueId", (req, res) => {
-  res.setHeader("Content-Type", "text/plain");
   Comment.find({ venueId: req.params.venueId })
     .populate("user")
     .then((data) => {
@@ -220,6 +220,69 @@ app.post("/newcomment", (req, res) => {
     })
     .catch((err) => {
       res.status(404).send(err);
+    });
+});
+//update/create new invite
+app.put("/invites/update/:eventId", async (req, res) => {
+  const user = await LoginModel.findOne({ username: req.body.username });
+  const invite = await Invite.findOne().populate({
+    path: "event",
+    match: { eventId: req.params.eventId },
+  });
+  if (invite) {
+    req.body.delete ? invite.users.pull({ _id: user._id }) : invite.users.addToSet(user._id);
+    console.log(invite.users.length);
+    invite.users.length
+      ? invite.save().then(() => res.status(200).send("Updated"))
+      : Invite.findByIdAndDelete(invite._id).then(() => res.status(200).send("Empty Invite, Removed"));
+  } else {
+    if (!req.body.delete) {
+      const userArray = [];
+      const event = await Event.findOne({ eventId: req.params.eventId });
+      userArray.push(user._id);
+      console.log(userArray);
+      Invite.create({
+        event: event._id,
+        users: userArray,
+      })
+        .then(() => res.status(200).send("New Invite Created"))
+        .catch((err) => res.status(500).send(err));
+    } else {
+      res.status(406).send("Cannot delete!");
+    }
+  }
+});
+
+//Get event invite for 1 event
+app.post("/invites/:eventId", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  Invite.findOne({})
+    .populate([
+      {
+        path: "users",
+      },
+      {
+        path: "event",
+        match: { eventId: req.params.eventId },
+      },
+    ])
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+//get all invites
+app.get("/invites", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  Invite.find()
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((data) => {
+      res.status(404).send(null);
     });
 });
 
