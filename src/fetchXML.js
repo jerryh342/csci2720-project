@@ -88,29 +88,32 @@ const getXML = async () => {
     // Check for updated events
     for (const event of filteredEvent) {
       const existingEvent = existingEvents.find(e => e.eventId === event.eventId);
-      if (existingEvent) {
-        // Update the event if it exists in the database
-        if (event.title !== existingEvent.title || event.venue !== existingEvent.venue || event.dateTime !== existingEvent.dateTime || event.desc !== existingEvent.desc || event.presenter !== existingEvent.presenter || event.price !== existingEvent.price) {
-          await Event.findByIdAndUpdate(existingEvent._id, event);
-        }
-      } else {
+      if (!existingEvent) {
         console.log("create event")
         await Event.create(event);
+      } else {
+         // // Update the event if it exists in the database
+        // if (event.title !== existingEvent.title || event.venue !== existingEvent.venue || event.dateTime !== existingEvent.dateTime || event.desc !== existingEvent.desc || event.presenter !== existingEvent.presenter || event.price !== existingEvent.price) {
+        //   await Event.findByIdAndUpdate(existingEvent._id, event);
+        // }
+        console.log("exist event, skipping")
+        return
       }
     }
 
     // Check for updated venues
     for (const venue of filteredLoc) {
       const existingVenue = existingVenues.find(v => v.venueId === venue.venueId);
-      if (existingVenue) {
-        // Update the venue if it exists in the database
-        if (venue.venueName !== existingVenue.venueName || venue.lat !== existingVenue.lat || venue.long !== existingVenue.long || venue.lut !==existingVenue.lut) {
-          await Venue.findByIdAndUpdate(existingVenue._id, venue);
-        }
+      if (!existingVenue) {
+           // Create a new venue if it doesn't exist in the database
+           console.log("create venue")
+           await Venue.create(venue);
       } else {
-        // Create a new venue if it doesn't exist in the database
-        console.log("create venue")
-        await Venue.create(venue);
+        // Update the venue if it exists in the database
+        // if (venue.venueName !== existingVenue.venueName || venue.lat !== existingVenue.lat || venue.long !== existingVenue.long || venue.lut !==existingVenue.lut) {
+        //   await Venue.findByIdAndUpdate(existingVenue._id, venue);
+        // }
+        console.log("exist veue, skipping")
       }
     }
     return true;
