@@ -59,6 +59,10 @@ const VenueSchema = new Schema({
     type: Number,
     required: true,
   },
+  lut: {
+    type: Array,
+    required: true,
+  },
 });
 
 const CommentSchema = Schema({
