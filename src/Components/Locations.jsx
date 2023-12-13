@@ -29,7 +29,6 @@ class Locations extends Component {
         method: "GET",
     })
     .then((r) => {
-        console.log(r.data);
         this.setState({
             locationList: r.data,
             filteredLocations: r.data
@@ -47,7 +46,6 @@ class Locations extends Component {
       this.setState({ filteredLocations: this.state.locationList });
     } else {
       const filteredLocations = this.state.locationList.filter(location => {
-        // Assuming 'name' is the property you want to search in
         const txtValue = Object.values(location).join(' ').toLowerCase();
         return txtValue.indexOf(filter) > -1;
       });
@@ -91,16 +89,17 @@ class Locations extends Component {
     return (
         <main>
           <div>
-            <Map venues={this.state.locationList} /> 
-          </div>
-          <div>
             <Input
               size="large"
               placeholder="Search"
               onChange={this.searchLocation}
               prefix={<SearchOutlined />}
             />
-            <br />
+          </div>
+          <div style={{height: '500px', width: '100%'}}>
+            {<Map venues={this.state.locationList} isSingleLocation={false} zoom={11} markerLink={true}/>}
+          </div>
+          <div>
             <Table columns={columns} dataSource={this.state.filteredLocations} rowKey="locid" />
           </div>
         </main>
