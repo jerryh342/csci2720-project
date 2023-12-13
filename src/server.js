@@ -62,12 +62,12 @@ db.once("open", function () {
       console.log("running");
       console.log("user", user);
       if (err) throw err;
-      if (!user) res.send("Password or Username dont match");
+      if (!user) res.status(403).send("Password or Username dont match");
       else {
         req.logIn(user, async (err) => {
           if (err) throw err;
           const result = await fetchXML.getXML();
-          res.status(200).send("Successfully Authenticated");
+          res.status(200).send(req.user);
           console.log(req.user);
         });
       }
