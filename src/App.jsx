@@ -9,6 +9,8 @@ import SignUp from "./Components/signup.js";
 import NoMatch from "./Components/NoMatch.jsx";
 import Home from "./Components/home.js";
 import Invites from "./Components/Invites.jsx";
+import User from "./Components/user";
+
 function App() {
   return (
     <div className="App">
@@ -20,6 +22,7 @@ function App() {
           <Route path="/venue" element={<Locations />} />
           <Route path="/venue/:venueId" element={<SingleLocation />} />
           <Route path="/invites" element={<Invites />} />
+          <Route path="/admin/user" element={<User />} />
           <Route path="*" element={<NoMatch />} />z
         </Routes>
       </BrowserRouter>
