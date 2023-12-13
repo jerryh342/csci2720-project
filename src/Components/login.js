@@ -50,7 +50,7 @@ const Login = () => {
             console.log("res.data>>", res.data);
             setSessionStorageWithExpiration("username", res.data.username, 120);
             //expire after 2 hrs
-            navigate("/home");
+            navigate("/venue");
           }
         })
         .then(async (res) => {
