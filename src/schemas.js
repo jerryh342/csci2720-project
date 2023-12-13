@@ -17,6 +17,7 @@ const EventSchema = new Schema({
     type: Number,
     required: [true, "venue is required"],
   },
+
   //predatee
   dateTime: {
     type: String,
@@ -80,11 +81,12 @@ const LoginSchema = new Schema({
   username: { type: String, required: true },
   email: { type: String, required: true },
   password: { type: String, required: true },
+  invitedEvents: { type: [Schema.Types.ObjectId], ref: "Invite", default: void 0 },
 });
 
 const InviteSchema = new Schema({
   event: { type: Schema.Types.ObjectId, ref: "Event", required: true },
-  users: { type: [Schema.Types.ObjectId], ref: "Login", required: true },
+  users: { type: [Schema.Types.ObjectId], ref: "login", required: true, default: void 0, unique: true },
 });
 
 exports.EventSchema = EventSchema;

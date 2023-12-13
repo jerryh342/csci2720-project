@@ -7,35 +7,6 @@ import { useParams } from "react-router-dom";
 import { GoogleMap, useLoadScript, MarkerF } from "@react-google-maps/api";
 const { TextArea } = Input;
 
-function TempMap(props) {
-  const libraries = ["places"];
-  const venue = props.venue;
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBGGC2kgrhzogounenjJfsElrOkWmOFlM0",
-    libraries,
-  });
-  const mapContainerStyle = {
-    width: "100%",
-    height: "100%",
-  };
-  const center = {
-    lat: venue.lat, //default lat, to be changed
-    lng: venue.long,
-  };
-  if (loadError) {
-    console.log(loadError);
-    return <div>Error loading map</div>;
-  }
-  if (!isLoaded) {
-    return <div>Rendering</div>;
-  }
-  return (
-    <GoogleMap mapContainerStyle={mapContainerStyle} zoom={15} center={center}>
-      <MarkerF position={center} />
-    </GoogleMap>
-  );
-}
-
 function LocationDetails(props) {
   const venue = props.venue;
   const data = [
@@ -264,7 +235,8 @@ function SingleLocation(props) {
   useEffect(() => {
     getLocationDetails();
     getVenueEvents();
-    getCurrentUser();
+    //getCurrentUser();
+    setUser("admin");
   }, []);
 
   return (
@@ -275,7 +247,7 @@ function SingleLocation(props) {
         <Divider />
         <div>
           <Row>
-            <Col span={12}>{<Map venues={venue} isSingleLocation zoom={15} />}</Col>
+            <Col span={12}>{<Map venues={venue} zoom={10} isSingleLocation />}</Col>
             <Col span={12}>
               <LocationDetails venue={venue} />
             </Col>

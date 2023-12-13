@@ -11,7 +11,10 @@ const EventSchema = require("./schemas.js").EventSchema;
 const VenueSchema = require("./schemas.js").VenueSchema;
 const CommentSchema = require("./schemas.js").CommentSchema;
 const LoginSchema = require("./schemas.js").LoginSchema;
+const InviteSchema = require("./schemas.js").InviteSchema;
 const LoginModel = mongoose.model("login", LoginSchema);
+const fetchXML = require("./fetchXML.js")
+
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -45,6 +48,10 @@ db.once("open", function () {
     res.send("Authenticated");
   });
 
+  app.get("/register", (req, res) => {
+    res.send("Authenticated");
+  });
+
   app.get("/login", (req, res) => {
     res.status(403).send("login");
   });
@@ -56,8 +63,9 @@ db.once("open", function () {
       if (err) throw err;
       if (!user) res.send("Password or Username dont match");
       else {
-        req.logIn(user, (err) => {
+        req.logIn(user, async (err) => {
           if (err) throw err;
+          const result = await fetchXML.getXML()
           res.status(200).send("Successfully Authenticated");
           console.log(req.user);
         });
@@ -65,12 +73,30 @@ db.once("open", function () {
     })(req, res, next);
   });
 
+  app.get("/user", (req, res)=>{
+    LoginModel.find({})
+    .then(result=>{
+      res.json(result)
+    })
+  })
+
+  app.get("/lcsdevents", async (req, res)=>{
+    try {
+      const result = await fetchXML.getXML()
+      console.log("runn>>")
+      res.set("Content-Type", "application/json");
+      res.send([result])
+    } catch (error) {
+      console.log("error>>", error)
+    }
+  })
+
   app.post("/register", async (req, res) => {
     try {
-      const { values } = req.body;
+      const { formData: values } = req.body;
       console.log("values>>", values);
       const username = values.username ? values.username : "";
-      const email = values.email ? values.email : "";
+      const email = "test@cuhk.edu.hk"
       const password = values.password ? await bcrypt.hash(values.password, 10) : "";
       console.log("username>> ", username);
       console.log("email>> ", email);
@@ -87,7 +113,10 @@ db.once("open", function () {
       })
         .then((user) => res.json(user))
         .catch((err) => res.json(err));
-    } catch (error) {}
+    } catch (error) {
+      console.log("error>>", error)
+      res.json(error)
+    }
   });
 
   app.delete("/logout", (req, res, next) => {
@@ -124,30 +153,47 @@ db.once("open", function () {
 const Event = mongoose.model("Event", EventSchema);
 const Venue = mongoose.model("Venue", VenueSchema);
 const Comment = mongoose.model("Comment", CommentSchema);
+const Invite = mongoose.model("Invite", InviteSchema);
 
-  //show all location data
-  app.get('/venue', async (req, res) => {
-    try {
-      const data = await Venue.find();
-      const venues = [];
-  
-      for (const item of data) {
-        const count = await Event.countDocuments({ venue: item.venueId });
-        venues.push({
-          name: item.venueName,
-          lat: item.lat,
-          long: item.long,
-          locid: item.venueId,
-          eventCount: count,
-        });
-      }
-  
-      res.status(200).send(venues);
-    } catch (err) {
-      console.log(err);
-      res.status(406).send(err);
+app.get("/venue/:venueId/ev", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  Event.find()
+    .populate({
+      path: "venue",
+      match: { venueId: req.params.venueId },
+    })
+    .then((data) => {
+      console.log(data);
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404);
+      res.send("Venue not found");
+    });
+});
+//show all location data
+app.get("/venue", async (req, res) => {
+  try {
+    const data = await Venue.find();
+    const venues = [];
+
+    for (const item of data) {
+      const count = await Event.countDocuments({ venue: item.venueId });
+      venues.push({
+        name: item.venueName,
+        lat: item.lat,
+        long: item.long,
+        locid: item.venueId,
+        eventCount: count,
+      });
     }
-  });
+
+    res.status(200).send(venues);
+  } catch (err) {
+    console.log(err);
+    res.status(406).send(err);
+  }
+});
 
 //get venue details
 app.get("/venue/:venueId", (req, res) => {
@@ -168,26 +214,25 @@ app.get("/venue/:venueId", (req, res) => {
       res.send("Venue not found");
     });
 });
-
-app.get("/venue/:venueId/ev", (req, res) => {
-  res.setHeader("Content-Type", "application/json");
-  Event.find()
-    .populate({
-      path: "venue",
-      match: { venueId: req.params.venueId },
-    })
+//show all location data
+app.get("/venue", (req, res) => {
+  Venue.find()
     .then((data) => {
-      console.log(data);
-      res.status(200).send(data);
+      let venues = data.map((item, idx) => {
+        return { name: item.venueName, lat: item.lat, long: item.long, locid: item.venueId };
+      });
+      res.status(200);
+      res.send(venues);
     })
     .catch((err) => {
-      res.status(404);
-      res.send("Venue not found");
+      console.log(err);
+      res.status(406);
+      res.send(err);
     });
 });
+
 // get comments
 app.get("/comments/:venueId", (req, res) => {
-  res.setHeader("Content-Type", "text/plain");
   Comment.find({ venueId: req.params.venueId })
     .populate("user")
     .then((data) => {
@@ -227,6 +272,69 @@ app.post("/newcomment", (req, res) => {
     })
     .catch((err) => {
       res.status(404).send(err);
+    });
+});
+//update/create new invite
+app.put("/invites/update/:eventId", async (req, res) => {
+  const user = await LoginModel.findOne({ username: req.body.username });
+  const invite = await Invite.findOne().populate({
+    path: "event",
+    match: { eventId: req.params.eventId },
+  });
+  if (invite) {
+    req.body.delete ? invite.users.pull({ _id: user._id }) : invite.users.addToSet(user._id);
+    console.log(invite.users.length);
+    invite.users.length
+      ? invite.save().then(() => res.status(200).send("Updated"))
+      : Invite.findByIdAndDelete(invite._id).then(() => res.status(200).send("Empty Invite, Removed"));
+  } else {
+    if (!req.body.delete) {
+      const userArray = [];
+      const event = await Event.findOne({ eventId: req.params.eventId });
+      userArray.push(user._id);
+      console.log(userArray);
+      Invite.create({
+        event: event._id,
+        users: userArray,
+      })
+        .then(() => res.status(200).send("New Invite Created"))
+        .catch((err) => res.status(500).send(err));
+    } else {
+      res.status(406).send("Cannot delete!");
+    }
+  }
+});
+
+//Get event invite for 1 event
+app.post("/invites/:eventId", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  Invite.findOne({})
+    .populate([
+      {
+        path: "users",
+      },
+      {
+        path: "event",
+        match: { eventId: req.params.eventId },
+      },
+    ])
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+//get all invites
+app.get("/invites", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  Invite.find()
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((data) => {
+      res.status(404).send(null);
     });
 });
 
