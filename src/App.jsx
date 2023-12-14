@@ -7,8 +7,10 @@ import Locations from "./Components/Locations.jsx";
 import Login from "./Components/login.js";
 import NoMatch from "./Components/NoMatch.jsx";
 import Invites from "./Components/Invites.jsx";
-import User from "./Components/user";
 import RegisterPage from "./Components/signup.js";
+import User from "./Components/user.jsx";
+import Event from "./Components/Event.jsx";
+import FavouriteVenue from "./Components/FavouriteVenue.jsx";
 
 function App() {
   return (
@@ -20,7 +22,9 @@ function App() {
           <Route path="/venue" element={<Locations />} />
           <Route path="/venue/:venueId" element={<SingleLocation />} />
           <Route path="/invites" element={<Invites />} />
+          <Route path="/venue/fav" element={<FavouriteVenue />} />
           <Route path="/admin/user" element={<User />} />
+          <Route path="/admin/event" element={<Event />} />
           <Route path="*" element={<NoMatch />} />z
         </Routes>
       </BrowserRouter>

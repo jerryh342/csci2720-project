@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Input, Button } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
@@ -15,6 +15,7 @@ class Locations extends Component {
       filteredLocations: [],
       isLoadingData: true,
       userFavList: []
+      lastUpdatedTime: "",
     };
 
     this.searchLocation = this.searchLocation.bind(this);
@@ -24,6 +25,7 @@ class Locations extends Component {
   componentDidMount() {
     this.LoadLocationList();
     this.loadUserFavLoc();
+    this.getCurrentUser();
   }
 
   // load all locations in a table
@@ -40,8 +42,22 @@ class Locations extends Component {
         this.setState({
           locationList: slicedData,
           filteredLocations: slicedData,
+          isLoadingData: false,
         });
-        this.setState({ isLoadingData: false });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  getCurrentUser() {
+    axios({
+      url: "http://localhost:8000/checkAuth",
+      method: "GET",
+      withCredentials: true,
+    })
+      .then((res) => {
+        this.setState({ user: res.data.username });
       })
       .catch((err) => {
         console.log(err);
@@ -107,6 +123,31 @@ class Locations extends Component {
     })
   }
 
+  addToFavourite = (record) => {
+    const { user } = this.state;
+    const locid = record.locid;
+    const data = { user: user, locid: locid };
+    this.handleSubmit(data);
+  };
+
+  handleSubmit(data) {
+    let payload = {
+      user: data.user,
+      locid: data.locid,
+    };
+    axios({
+      url: "http://localhost:8000/venue/fav",
+      method: "POST",
+      data: payload,
+    })
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
   render() {
     const columns = [
       {
@@ -151,8 +192,13 @@ class Locations extends Component {
           onClick={()=>this.handleFavClick(rowRecord)}
           />
         )
-          
-        
+    
+        /*title: "Add To Favourite",
+        render: (_, record) => (
+          <button type="button" className="btn btn-success" onClick={() => this.addToFavourite(record)}>
+            Add
+          </button>
+        ),*/
       },
     ];
 

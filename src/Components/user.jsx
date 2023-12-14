@@ -13,7 +13,6 @@ class User extends Component {
       editingValues: {},
     };
   }
-
   componentDidMount() {
     this.LoadUserList();
   }
@@ -84,6 +83,15 @@ class User extends Component {
 
   render() {
     const { editingKey, editingValues } = this.state;
+    let role;
+    try {
+      role = JSON.parse(sessionStorage.getItem("role")).value;
+    } catch (error) {
+      console.log("error>>", error);
+    }
+    if (role !== "admin") {
+      window.location.assign("/");
+    }
 
     const columns = [
       {
