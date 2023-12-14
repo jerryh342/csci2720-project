@@ -7,8 +7,9 @@ import Locations from "./Components/Locations.jsx";
 import Login from "./Components/login.js";
 import SignUp from "./Components/signup.js";
 import NoMatch from "./Components/NoMatch.jsx";
-import Home from "./Components/home.js";
 import Invites from "./Components/Invites.jsx";
+import User from "./Components/user";
+
 function App() {
   return (
     <div className="App">
@@ -16,10 +17,10 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<SignUp />} />
-          <Route path="/home" element={<Home />} />
           <Route path="/venue" element={<Locations />} />
           <Route path="/venue/:venueId" element={<SingleLocation />} />
           <Route path="/invites" element={<Invites />} />
+          <Route path="/admin/user" element={<User />} />
           <Route path="*" element={<NoMatch />} />z
         </Routes>
       </BrowserRouter>

@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Button, Checkbox, Form, Input, Typography, Col, Row, Space } from 'antd';
+import { Button, Checkbox, Form, Input, Typography, Col, Row, Space } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import NavBar from "./navbar";
 import 'bootstrap/dist/css/bootstrap.css';
 import ClockCircleOutlined from '@ant-design/icons/ClockCircleOutlined';
 import { useForm } from 'antd/lib/form/Form';
+
 
 const { Title } = Typography;
 
@@ -46,21 +47,21 @@ const Login = () => {
         },
         withCredentials: true,
         url: "http://localhost:8000/login",
-      }).then(async (res) => {
-        console.log("res>>", res);
-        if (res.status == 200) {
-          console.log("res.data>>", res.data)
-          setSessionStorageWithExpiration("username", res.data.username, 120)
-          //expire after 2 hrs
-          navigate("/home");
-        }
       })
+      .then(async (res) => {
+          console.log("res>>", res);
+          if (res.status == 200) {
+            console.log("res.data>>", res.data);
+            setSessionStorageWithExpiration("username", res.data.username, 120);
+            //expire after 2 hrs
+            navigate("/venue");
+          }
+        })
       .catch(err=>{
         console.log("reset")
         form.resetFields();
         setShowErr(true)
       })
-      
     } catch (error) {
       console.log("error>>", error);
     }
@@ -68,18 +69,18 @@ const Login = () => {
   return (
     <>
       <NavBar />
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 100}}>
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 100 }}>
         <Form
           name="basic"
           labelCol={{
-            span: 6
+            span: 6,
           }}
           wrapperCol={{
-            span: 12
+            span: 12,
           }}
           style={{
             width: "50%",
-            alignContent: "center"
+            alignContent: "center",
           }}
           initialValues={{
             remember: true,
@@ -90,10 +91,10 @@ const Login = () => {
         >
           <Form.Item
             labelCol={{
-              span: 6
+              span: 6,
             }}
             wrapperCol={{
-              span: 12
+              span: 12,
             }}
             label="username"
             name="username"
@@ -114,10 +115,10 @@ const Login = () => {
 
           <Form.Item
             labelCol={{
-              span: 6
+              span: 6,
             }}
             wrapperCol={{
-              span: 12
+              span: 12,
             }}
             label="password"
             name="password"
@@ -139,8 +140,6 @@ const Login = () => {
           </Button>
         </Form>
       </div>
-
-
     </>
   );
 };

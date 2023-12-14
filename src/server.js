@@ -159,6 +159,67 @@ db.once("open", function () {
   })
 });
 
+// get users data
+app.get("/admin/user", (req, res) => {
+  LoginModel.find()
+    .then((data) => {
+      let users = data.map((item, idx) => {
+        return { id: item._id, name: item.username, email: item.email, pw: item.password};
+      });
+      res.status(200);
+      res.send(users);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(406);
+      res.send(err);
+    });
+});
+
+// Delete User data
+app.delete("/deleteuser/:username", (req, res) => {
+  LoginModel.findOneAndDelete({ username: req.params['username'] })
+    .then((data) => {
+      if (data) {
+        res.sendStatus(204);
+      } else {
+        res.setHeader("Content-Type", "text/plain");
+        res.status(404).send("User was not found, no user was deleted.");
+        console.log("User was not found, no user was deleted.");
+      }
+    })
+    .catch((error) => {
+      res.setHeader("Content-Type", "text/plain");
+      res.status(500).send("Internal Server Error");
+    });
+});
+
+// Update User Data
+app.put("/updateuser/:id", (req, res) => {
+  const updatedData = req.body;
+
+  if (!updatedData.username || !updatedData.pw) {
+    res.setHeader("Content-Type", "text/plain");
+    res.status(400).send("Request body must include both username and password.");
+    return;
+  }
+
+  LoginModel.findOneAndUpdate({ _id: req.params.id }, updatedData, { new: true })
+      .then((data) => {
+      if (data) {
+        res.json(data);
+      } else {
+        res.setHeader("Content-Type", "text/plain");
+        res.status(404).send("User not found.");
+      }
+    })
+    .catch((error) => {
+      res.setHeader("Content-Type", "text/plain");
+      res.status(500).send("Internal Server Error");
+      console.log(error);
+    });
+});
+
 const Event = mongoose.model("Event", EventSchema);
 const Venue = mongoose.model("Venue", VenueSchema);
 const Comment = mongoose.model("Comment", CommentSchema);
@@ -373,21 +434,25 @@ app.post("/invites/user", async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   if (req.body.username) {
     const user = await LoginModel.findOne({ username: req.body.username });
-    Invite.find({ users: user._id })
-      .populate([
-        {
-          path: "users",
-        },
-        {
-          path: "event",
-        },
-      ])
-      .then((data) => {
-        res.status(200).send(data);
-      })
-      .catch((err) => {
-        res.status(404).send(err);
-      });
+    try {
+      Invite.find({ users: user._id })
+        .populate([
+          {
+            path: "users",
+          },
+          {
+            path: "event",
+          },
+        ])
+        .then((data) => {
+          res.status(200).send(data);
+        })
+        .catch((err) => {
+          res.status(404).send(err);
+        });
+    } catch (err) {
+      console.log(err);
+    }
   } else {
     res.status(400).send("No username provided");
   }
@@ -589,24 +654,6 @@ app.post("/ev", (req, res) => {
 // Delete Event data
 app.delete("/ev/:eventId", (req, res) => {
   Event.findOneAndDelete({ eventId: req.params.eventId })
-    .then((data) => {
-      if (data) {
-        res.sendStatus(204);
-      } else {
-        res.setHeader("Content-Type", "text/plain");
-        res.status(404).send("Event was not found, no event was deleted.");
-        console.log("Event was not found, no event was deleted.");
-      }
-    })
-    .catch((error) => {
-      res.setHeader("Content-Type", "text/plain");
-      res.status(500).send("Internal Server Error");
-    });
-});
-
-// Delete User data
-app.delete("/user/:userName", (req, res) => {
-  LoginSchema.findOneAndDelete({ username: req.params.userName })
     .then((data) => {
       if (data) {
         res.sendStatus(204);
