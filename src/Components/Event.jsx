@@ -166,6 +166,7 @@ class Event extends Component {
 
   // Edit an event
   editEvent = (e) => {
+    this.setState({ isModalOpen: true });
     this.setState({
       editingKey: e.eventId,
       editingValues: {
