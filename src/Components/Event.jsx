@@ -221,6 +221,15 @@ class Event extends Component {
       .catch((err) => console.log(err));
   };
   render() {
+    let role;
+    try {
+      role = JSON.parse(sessionStorage.getItem("role"))?.value;
+    } catch (error) {
+      console.log("error>>", error);
+    }
+    if (role !== "admin") {
+      window.location.assign("/");
+    }
     const { editingKey, editingValues } = this.state;
     const columns = [
       {
