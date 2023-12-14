@@ -730,7 +730,7 @@ app.get("/invites", (req, res) => {
 app.delete("/admin/event/delete/:eventId", (req, res) => {
   Event.findOneAndDelete({ eventId: req.params["eventId"] })
     .then((data) => {
-      if (data) {
+      if (data.deletedCount === 1) {
         res.sendStatus(204);
       } else {
         res.setHeader("Content-Type", "text/plain");
