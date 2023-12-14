@@ -1,7 +1,7 @@
 // import UseAuth from '../hooks/auth';
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, Redirect, redirect } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { HomeOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
 import { Breadcrumb, Layout, Menu, theme } from "antd";
 const { Header, Content, Footer } = Layout;
@@ -11,6 +11,7 @@ const NavBar = () => {
   // const user = UseAuth()
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const logOut = () => {
     axios({
@@ -30,7 +31,7 @@ const NavBar = () => {
         setUser(res.data);
       } catch (error) {
         setUser(null);
-        return navigate("/login");
+        return location.pathname == "/register" ? null : navigate("/login");
       }
     };
     checkAuth();
