@@ -12,6 +12,7 @@ const VenueSchema = require("./schemas.js").VenueSchema;
 const CommentSchema = require("./schemas.js").CommentSchema;
 const LoginSchema = require("./schemas.js").LoginSchema;
 const InviteSchema = require("./schemas.js").InviteSchema;
+const FavVenueSchema = require("./schemas.js").FavVenueSchema;
 const LoginModel = mongoose.model("login", LoginSchema);
 const fetchXML = require("./fetchXML.js");
 
@@ -236,6 +237,117 @@ const Event = mongoose.model("Event", EventSchema);
 const Venue = mongoose.model("Venue", VenueSchema);
 const Comment = mongoose.model("Comment", CommentSchema);
 const Invite = mongoose.model("Invite", InviteSchema);
+const FavVenue = mongoose.model("FavVenue", FavVenueSchema);
+//Favorite venues
+app.post("/venue/fav", (req, res) => {
+  res.setHeader("Content-Type", "text/plain");
+  const usrname = req.body.user;
+  const venue = req.body.locid;
+
+  LoginModel.findOne({ username: usrname })
+    .then((userData) => {
+      const userId = userData._id;
+      Venue.findOne({ venueId: venue })
+        .then((venueData) => {
+          const venueId = venueData._id;
+          FavVenue.findOne({ user: userId, venue: venueId })
+            .then((favVenueData) => {
+              if (favVenueData) {
+                // Favorite venue already exists for the user
+                res.status(409).send("Favorite venue already exists");
+              } else {
+                FavVenue.create({
+                  user: userId,
+                  venue: venueId,
+                })
+                  .then(() => {
+                    res.status(200).send("Added to favorite venue");
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                    res.status(500).send(err);
+                  });
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+              res.status(500).send(err);
+            });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).send(err);
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).send(err);
+    });
+});
+//show favourite venue data
+app.get("/venue/fav/:user", async (req, res) => {
+  try {
+    const username = req.params.user;
+    // console.log(username);
+    const userData = await LoginModel.findOne({ username });
+    if (!userData) {
+      return res.status(404).send("No Favourite");
+    }
+
+    const userId = userData._id;
+    const data = await FavVenue.find({ user: userId });
+    const favVenues = [];
+
+    for (const item of data) {
+      // console.log(item.venue);
+      const venueData = await Venue.findById(item.venue);
+      const count = await Event.countDocuments({ venue: venueData.venueId });
+      favVenues.push({
+        name: venueData.venueName,
+        lat: venueData.lat,
+        long: venueData.long,
+        locid: venueData.venueId,
+        eventCount: count,
+      });
+    }
+    res.status(200).send(favVenues);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+//delete favourite venue
+app.delete("/venue/fav", (req, res) => {
+  res.setHeader("Content-Type", "text/plain");
+  const usrname = req.body.user;
+  const venue = req.body.locid;
+
+  LoginModel.findOne({ username: usrname })
+    .then((userData) => {
+      const userId = userData._id;
+      Venue.findOne({ venueId: venue })
+        .then((venueData) => {
+          const venueId = venueData._id;
+          FavVenue.findOneAndDelete({ user: userId, venue: venueId })
+            .then((favVenueData) => {
+              if (!favVenueData) {
+                // Favorite venue does not exist for the user
+                res.status(404).send("Favorite venue not found");
+              } else {
+                res.status(200).send("Removed from favorite venues");
+              }
+            })
+            .catch((err) => {
+              res.status(500).send(err);
+            });
+        })
+        .catch((err) => {
+          res.status(500).send(err);
+        });
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
 
 app.get("/venue/:venueId/ev", (req, res) => {
   res.setHeader("Content-Type", "application/json");
@@ -535,7 +647,6 @@ app.get("/invites", (req, res) => {
     });
 });*/
 
-
 // CRUD event data
 // Create an event
 app.post("/createevent", async (req, res) => {
@@ -563,11 +674,11 @@ app.post("/createevent", async (req, res) => {
 
     Event.create({
       eventId: eventid,
-      title: title, 
-      loc: venue, 
-      date: dateTime, 
-      desc: description, 
-      presenter: presenter, 
+      title: title,
+      loc: venue,
+      date: dateTime,
+      desc: description,
+      presenter: presenter,
       price: price,
     })
       .then((event) => res.json(event))
@@ -583,14 +694,15 @@ app.get("/admin/event", (req, res) => {
   Event.find()
     .then((data) => {
       let evs = data.map((item, idx) => {
-        return { 
+        return {
           eventId: item.eventId,
-          title: item.title, 
-          loc: item.venue, 
-          date: item.dateTime, 
-          desc: item.desc, 
-          presenter: item.presenter, 
-          price: item.price};
+          title: item.title,
+          loc: item.venue,
+          date: item.dateTime,
+          desc: item.desc,
+          presenter: item.presenter,
+          price: item.price,
+        };
       });
       res.status(200);
       res.send(evs);
@@ -604,7 +716,7 @@ app.get("/admin/event", (req, res) => {
 
 // Delete User data
 app.delete("/deleteevent/:eventId", (req, res) => {
-  Event.findOneAndDelete({ eventId: req.params['eventId'] })
+  Event.findOneAndDelete({ eventId: req.params["eventId"] })
     .then((data) => {
       if (data) {
         res.sendStatus(204);
@@ -620,7 +732,6 @@ app.delete("/deleteevent/:eventId", (req, res) => {
     });
 });
 
-
 // CRUD event data
 // Create an event
 app.post("/createevent", async (req, res) => {
@@ -648,11 +759,11 @@ app.post("/createevent", async (req, res) => {
 
     Event.create({
       eventId: eventid,
-      title: title, 
-      loc: venue, 
-      date: dateTime, 
-      desc: description, 
-      presenter: presenter, 
+      title: title,
+      loc: venue,
+      date: dateTime,
+      desc: description,
+      presenter: presenter,
       price: price,
     })
       .then((event) => res.json(event))
@@ -668,14 +779,15 @@ app.get("/admin/event", (req, res) => {
   Event.find()
     .then((data) => {
       let evs = data.map((item, idx) => {
-        return { 
+        return {
           eventId: item.eventId,
-          title: item.title, 
-          loc: item.venue, 
-          date: item.dateTime, 
-          desc: item.desc, 
-          presenter: item.presenter, 
-          price: item.price};
+          title: item.title,
+          loc: item.venue,
+          date: item.dateTime,
+          desc: item.desc,
+          presenter: item.presenter,
+          price: item.price,
+        };
       });
       res.status(200);
       res.send(evs);
@@ -689,7 +801,7 @@ app.get("/admin/event", (req, res) => {
 
 // Delete User data
 app.delete("/deleteevnet/:eventId", (req, res) => {
-  Event.findOneAndDelete({ eventId: req.params['eventId'] })
+  Event.findOneAndDelete({ eventId: req.params["eventId"] })
     .then((data) => {
       if (data) {
         res.sendStatus(204);
@@ -709,14 +821,21 @@ app.delete("/deleteevnet/:eventId", (req, res) => {
 app.put("/updateevent/:eventId", (req, res) => {
   const updatedData = req.body;
 
-  if (!updatedData.title || !updatedData.venue || !updatedData.dataTime || !updatedData.desc || !updatedData.presenter || !updatedData.price) {
+  if (
+    !updatedData.title ||
+    !updatedData.venue ||
+    !updatedData.dataTime ||
+    !updatedData.desc ||
+    !updatedData.presenter ||
+    !updatedData.price
+  ) {
     res.setHeader("Content-Type", "text/plain");
     res.status(400).send("Request body must include all fields.");
     return;
   }
 
   Event.findOneAndUpdate({ eventId: req.params.eventId }, updatedData, { new: true })
-      .then((data) => {
+    .then((data) => {
       if (data) {
         res.json(data);
       } else {

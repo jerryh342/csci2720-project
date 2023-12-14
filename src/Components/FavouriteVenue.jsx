@@ -2,48 +2,23 @@ import React, { Component, useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import Map from "./Map";
 import NavBar from "./navbar";
 
-class Locations extends Component {
+class FavouriteLocations extends Component {
   constructor(props) {
     super(props);
     this.state = {
       locationList: [],
       filteredLocations: [],
-      isLoadingData: true,
-      lastUpdatedTime: "",
     };
-
-    this.searchLocation = this.searchLocation.bind(this);
   }
 
   //invoked for each set state(only called once => new class + new componentdidmount)
   componentDidMount() {
-    this.LoadLocationList();
     this.getCurrentUser();
-  }
-
-  // load all locations in a table
-  LoadLocationList() {
-    this.setState({ isLoadingData: true });
-    axios({
-      // need change localhost to the publicIP
-      url: "http://localhost:8000/venue",
-      method: "GET",
-    })
-      .then((r) => {
-        const filteredData = r.data.filter((v) => v.eventCount > 3);
-        const slicedData = filteredData.slice(0, 10);
-        this.setState({
-          locationList: slicedData,
-          filteredLocations: slicedData,
-          isLoadingData: false,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    setTimeout(() => {
+      this.LoadLocationList();
+    }, 100);
   }
 
   getCurrentUser() {
@@ -60,22 +35,25 @@ class Locations extends Component {
       });
   }
 
-  searchLocation(event) {
-    const filter = event.target.value.toLowerCase();
-
-    if (filter === "") {
-      this.setState({ filteredLocations: this.state.locationList });
-    } else {
-      const filteredLocations = this.state.locationList.filter((location) => {
-        const txtValue = Object.values(location).join(" ").toLowerCase();
-        return txtValue.indexOf(filter) > -1;
+  // load all locations in a table
+  LoadLocationList() {
+    axios({
+      // need change localhost to the publicIP
+      url: `http://localhost:8000/venue/fav/${this.state.user}`,
+      method: "GET",
+    })
+      .then((r) => {
+        this.setState({
+          locationList: r.data,
+          filteredLocations: r.data,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
       });
-
-      this.setState({ filteredLocations });
-    }
   }
 
-  addToFavourite = (record) => {
+  deleteFromFavourite = (record) => {
     const { user } = this.state;
     const locid = record.locid;
     const data = { user: user, locid: locid };
@@ -89,7 +67,7 @@ class Locations extends Component {
     };
     axios({
       url: "http://localhost:8000/venue/fav",
-      method: "POST",
+      method: "DELETE",
       data: payload,
     })
       .then((res) => {
@@ -131,10 +109,10 @@ class Locations extends Component {
         sortDirections: ["descend", "ascend"],
       },
       {
-        title: "Add To Favourite",
+        title: "Delete from Favourite",
         render: (_, record) => (
-          <button type="button" className="btn btn-success" onClick={() => this.addToFavourite(record)}>
-            Add
+          <button type="button" className="btn btn-danger" onClick={() => this.deleteFromFavourite(record)}>
+            Delete
           </button>
         ),
       },
@@ -145,24 +123,15 @@ class Locations extends Component {
         <div>
           <NavBar />
         </div>
-        <div style={{ height: "500px", width: "100%" }}>
-          {<Map venues={this.state.locationList} isSingleLocation={false} zoom={11} markerLink={true} />}
-        </div>
+        <header>
+          <h1>Favourite Venue</h1>
+        </header>
         <div>
-          <Input size="large" placeholder="Search" onChange={this.searchLocation} prefix={<SearchOutlined />} />
-        </div>
-        <div>
-          <Table
-            columns={columns}
-            dataSource={this.state.filteredLocations}
-            loading={this.state.isLoadingData}
-            pagination={false}
-            rowKey="locid"
-          />
+          <Table columns={columns} dataSource={this.state.filteredLocations} rowKey="locid" />
         </div>
       </main>
     );
   }
 }
 
-export default Locations;
+export default FavouriteLocations;
