@@ -270,7 +270,7 @@ function SingleLocation(props) {
   }
 
   function getCurrentUser() {
-    const user = JSON.parse(sessionStorage.getItem("username")).value;
+    const user = JSON.parse(sessionStorage.getItem("username"))?.value || "";
     if (user) {
       setUser(user);
     } else {
