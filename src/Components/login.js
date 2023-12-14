@@ -51,8 +51,9 @@ const Login = () => {
           console.log("res>>", res);
           if (res.status == 200) {
             console.log("res.data>>", res.data);
-            setSessionStorageWithExpiration("username", res.data.username, 120);
-            setSessionStorageWithExpiration("role", res.data.role, 120);
+            setSessionStorageWithExpiration("username", res.data.user.username, 120);
+            setSessionStorageWithExpiration("role", res.data.user.role, 120);
+            setSessionStorageWithExpiration("lastUpdatedTime", res.data.timestamp, 120);
             //expire after 2 hrs
             navigate("/venue");
           }
