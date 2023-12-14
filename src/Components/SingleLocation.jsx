@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Spin, List, Row, Col, Descriptions, Button, Form, Input, Divider, Space, Table } from "antd";
+import { Card, Spin, List, Row, Col, Descriptions, Button, Form, Input, Divider, Space, Table, Collapse } from "antd";
 import axios from "axios";
 import NavBar from "./navbar";
 import Map from "./Map";
@@ -43,9 +43,28 @@ function LocationDetails(props) {
   );
 }
 
-function EventDetails(props) {
-  const events = props.events.map((item, idx) => ({ ...item, key: idx }));
-  console.log(events);
+function EventDetails() {
+  const [events, setEvents] = useState([]);
+  const [freeEvents, setFreeEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { venueId } = useParams();
+  function getVenueEvents() {
+    setIsLoading(true);
+    axios({
+      url: "http://localhost:8000/venue/" + venueId + "/ev",
+      method: "GET",
+    })
+      .then((res) => {
+        setEvents(res.data.map((item, idx) => ({ ...item, key: idx })));
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  function getFreeEvents() {
+    setFreeEvents(events.filter((item) => item.price == "Free admission by tickets"));
+  }
   const columns = [
     {
       title: "Event ID",
@@ -78,10 +97,54 @@ function EventDetails(props) {
       key: "price",
     },
   ];
+  useEffect(() => {
+    getVenueEvents();
+  }, []);
+  useEffect(() => {
+    getFreeEvents();
+  }, [events]);
   return (
     <>
       <div>
-        <Table title={() => <h3 textAlign="center">Event Details</h3>} columns={columns} bordered dataSource={events} />
+        {
+          <Collapse
+            size="large"
+            items={[
+              {
+                key: 1,
+                label: "Free Events",
+                children: (
+                  <List
+                    grid={{
+                      gutter: 16,
+                      xs: 1,
+                      sm: 2,
+                      md: 4,
+                      lg: 4,
+                      xl: 6,
+                      xxl: 3,
+                    }}
+                    dataSource={freeEvents}
+                    renderItem={(item, idx) => (
+                      <List.Item>
+                        <Card key={idx} title={item.title}>
+                          {item.dateTime}
+                        </Card>
+                      </List.Item>
+                    )}
+                  ></List>
+                ),
+              },
+            ]}
+          ></Collapse>
+        }
+        <Table
+          title={() => <h3 textAlign="center">All Events</h3>}
+          columns={columns}
+          bordered
+          dataSource={events}
+          loading={isLoading}
+        />
       </div>
     </>
   );
@@ -192,7 +255,6 @@ function SingleLocation(props) {
   const [user, setUser] = useState(null);
   const { venueId } = useParams();
   const [venue, setVenue] = useState([]);
-  const [events, setEvents] = useState([]);
   function getLocationDetails() {
     axios({
       url: "http://localhost:8000/venue/" + venueId,
@@ -206,34 +268,17 @@ function SingleLocation(props) {
         console.log(err);
       });
   }
-  function getVenueEvents() {
-    axios({
-      url: "http://localhost:8000/venue/" + venueId + "/ev",
-      method: "GET",
-    })
-      .then((res) => {
-        setEvents(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
+
   function getCurrentUser() {
-    axios({
-      url: "http://localhost:8000/checkAuth",
-      method: "GET",
-      withCredentials: true,
-    })
-      .then((res) => {
-        setUser(res.data.username);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const user = JSON.parse(sessionStorage.getItem("username")).value;
+    if (user) {
+      setUser(user);
+    } else {
+      setUser(null);
+    }
   }
   useEffect(() => {
     getLocationDetails();
-    getVenueEvents();
     getCurrentUser();
     //setUser("admin"); //TODO: get current user
   }, []);
@@ -253,7 +298,7 @@ function SingleLocation(props) {
           </Row>
         </div>
         <Divider />
-        <EventDetails events={events} />
+        <EventDetails />
         <Comments venueId={venueId} user={user} />
       </div>
     </>
