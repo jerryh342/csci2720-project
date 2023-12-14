@@ -36,6 +36,7 @@ module.exports = function (passport) {
       .then((user) => {
         const userInformation = {
           username: user.username,
+          role: user.role
         };
         cb(null, userInformation);
       })
