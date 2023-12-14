@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HomeOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
 import { Breadcrumb, Layout, Menu, theme } from "antd";
-import { MISCELLANEOUS_TYPES } from "@babel/types";
 const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
 
