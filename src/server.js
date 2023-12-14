@@ -196,14 +196,17 @@ app.delete("/deleteuser/:username", (req, res) => {
 });
 
 // Update User Data
-app.put("/updateuser/:id", (req, res) => {
-  const updatedData = req.body;
+app.put("/updateuser/:id", async (req, res) => {
+  let updatedData = req.body;
 
-  if (!updatedData.username || !updatedData.pw) {
+  if (!updatedData.username || !updatedData.password) {
     res.setHeader("Content-Type", "text/plain");
     res.status(400).send("Request body must include both username and password.");
     return;
   }
+  //hash password
+  const hashedPw = await bcrypt.hash(updatedData.password, 10);
+  updatedData.password = hashedPw;
 
   LoginModel.findOneAndUpdate({ _id: req.params.id }, updatedData, { new: true })
     .then((data) => {
