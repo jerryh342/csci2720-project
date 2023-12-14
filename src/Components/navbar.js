@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Redirect, redirect } from "react-router-dom";
-import { AppstoreOutlined, MailOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { HomeOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
+import { Breadcrumb, Layout, Menu, theme } from "antd";
 const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
 
@@ -18,7 +18,7 @@ const NavBar = (props) => {
       url: "http://localhost:8000/logout",
       withCredentials: true,
     })
-      .then(()=>sessionStorage.removeItem('user'))
+      .then(() => sessionStorage.removeItem("user"))
       .catch((err) => {
         return navigate("/login");
       });
@@ -38,32 +38,38 @@ const NavBar = (props) => {
   console.log("user>>", user);
   if (!user) {
     return (
-
       <Menu mode="horizontal" theme="dark" style={{ display: 'flex', justifyContent: 'space-between' }}>
         <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
           {component}
         </Menu.Item>
         <Menu.Item key="right-item" style={{ marginLeft: 'auto' }} icon={<UserOutlined />}>
-          Guest
-        </Menu.Item>
-      </Menu>
 
+      </Menu>
     );
   } else {
     return (
+
       <Menu mode="horizontal" theme="dark" style={{ display: 'flex', justifyContent: 'space-between' }}>
         <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
           {component}
         </Menu.Item>
-        <Menu.Item key="right-item" style={{ marginLeft: 'auto' }} disableActive>
+        <Menu.Item key="venue" style={{ marginLeft: 100, marginRight: 100 }} onClick={() => navigate("/venue")}>
+          <HomeOutlined style={{ marginRight: 10 }} />
+          Venues
+        </Menu.Item>
+        <Menu.Item key="invites" style={{ marginLeft: 100, marginRight: 100 }} onClick={() => navigate("/invites")}>
+          <MailOutlined style={{ marginRight: 10 }} />
+          Event Invitations
+        </Menu.Item>
+        <Menu.Item key="right-item" style={{ marginLeft: "auto" }} disableactive>
           <SubMenu key="SubMenu" icon={<UserOutlined />} title={user.username}>
-            
-              <Menu.Item key="setting:1" onClick={logOut}>Logout</Menu.Item>
-              <Menu.Item key="setting:2" onClick={()=>navigate('/register')}>Add new users</Menu.Item>
-
-            
+            <Menu.Item key="setting:1" onClick={logOut}>
+              Logout
+            </Menu.Item>
+            <Menu.Item key="setting:2" onClick={() => navigate("/register")}>
+              Add new users (maybe add to Jeffrey's Page)
+            </Menu.Item>
           </SubMenu>
-
         </Menu.Item>
       </Menu>
     );
