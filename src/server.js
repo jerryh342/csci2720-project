@@ -84,23 +84,23 @@ db.once("open", function () {
   app.post("/userbyusername", (req, res) => {
     const user = req.body?.username || "";
     if (!user) {
-      return req.status(500).send("User missing")
+      return req.status(500).send("User missing");
     }
     LoginModel.findOne({ username: user })
-      .then(user => {
+      .then((user) => {
         if (user) {
           const favValueArr = user.fav;
-          console.log('Favorite value:', favValueArr);
-          res.status(200).send(favValueArr)
+          console.log("Favorite value:", favValueArr);
+          res.status(200).send(favValueArr);
         } else {
-          console.log('User not found');
-          return res.status(404).send("User missing")
+          console.log("User not found");
+          return res.status(404).send("User missing");
         }
       })
-      .catch(error => {
-        res.status(404).send('Error finding user:', error);
+      .catch((error) => {
+        res.status(404).send("Error finding user:", error);
       });
-  })
+  });
 
   app.get("/lcsdevents", async (req, res) => {
     try {
@@ -556,7 +556,7 @@ app.put("/invites/update/:eventId", async (req, res) => {
     if (invite.users.length !== 0) {
       invite
         .save()
-        .then(() => { })
+        .then(() => {})
         .catch((err) => {
           console.log(err);
           console.log("test");
@@ -564,7 +564,7 @@ app.put("/invites/update/:eventId", async (req, res) => {
       msg = invite;
     } else {
       Invite.findByIdAndDelete(invite._id)
-        .then(() => { })
+        .then(() => {})
         .catch((err) => {
           console.log(err);
         });
@@ -714,158 +714,9 @@ app.get("/invites", (req, res) => {
 
 // CRUD event data
 // Create an event
-app.post("/createevent", async (req, res) => {
-  try {
-    const { formData: values } = req.body;
-    console.log("values>>", values);
-    const eventid = values.eventId ? values.eventId : "";
-    const title = values.title ? values.title : "";
-    const venue = values.loc ? values.loc : "";
-    const dateTime = values.date ? values.date : "";
-    const description = values.desc ? values.desc : "";
-    const presenter = values.presenter ? values.presenter : "";
-    const price = values.price ? values.price : "";
-    console.log("eventID>> ", eventid);
-    console.log("title>> ", title);
-    console.log("venue>> ", venue);
-    console.log("dateTime>> ", dateTime);
-    console.log("description>> ", description);
-    console.log("presenter>> ", presenter);
-    console.log("price>> ", price);
-
-    if (!eventid || !title || !venue || !dateTime || !description || !presenter || !price) {
-      return res.status(406).send("Field missing");
-    }
-
-    Event.create({
-      eventId: eventid,
-      title: title,
-      loc: venue,
-      date: dateTime,
-      desc: description,
-      presenter: presenter,
-      price: price,
-    })
-      .then((event) => res.json(event))
-      .catch((err) => res.json(err));
-  } catch (error) {
-    console.log("error>>", error);
-    res.json(error);
-  }
-});
-
-//Read all Event data
-app.get("/admin/event", (req, res) => {
-  Event.find()
-    .then((data) => {
-      let evs = data.map((item, idx) => {
-        return {
-          eventId: item.eventId,
-          title: item.title,
-          loc: item.venue,
-          date: item.dateTime,
-          desc: item.desc,
-          presenter: item.presenter,
-          price: item.price,
-        };
-      });
-      res.status(200);
-      res.send(evs);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(406);
-      res.send(err);
-    });
-});
 
 // Delete User data
-app.delete("/deleteevent/:eventId", (req, res) => {
-  Event.findOneAndDelete({ eventId: req.params["eventId"] })
-    .then((data) => {
-      if (data) {
-        res.sendStatus(204);
-      } else {
-        res.setHeader("Content-Type", "text/plain");
-        res.status(200).send(JSON.stringify(eventData, null, 2));
-      }
-    })
-    .catch((err) => {
-      res.setHeader("Content-Type", "text/plain");
-      console.log(err);
-      res.status(500).send("Internal Server Error");
-    });
-});
-
-// CRUD event data
-// Create an event
-app.post("/createevent", async (req, res) => {
-  try {
-    const { formData: values } = req.body;
-    console.log("values>>", values);
-    const eventid = values.eventId ? values.eventId : "";
-    const title = values.title ? values.title : "";
-    const venue = values.loc ? values.loc : "";
-    const dateTime = values.date ? values.date : "";
-    const description = values.desc ? values.desc : "";
-    const presenter = values.presenter ? values.presenter : "";
-    const price = values.price ? values.price : "";
-    console.log("eventID>> ", eventid);
-    console.log("title>> ", title);
-    console.log("venue>> ", venue);
-    console.log("dateTime>> ", dateTime);
-    console.log("description>> ", description);
-    console.log("presenter>> ", presenter);
-    console.log("price>> ", price);
-
-    if (!eventid || !title || !venue || !dateTime || !description || !presenter || !price) {
-      return res.status(406).send("Field missing");
-    }
-
-    Event.create({
-      eventId: eventid,
-      title: title,
-      loc: venue,
-      date: dateTime,
-      desc: description,
-      presenter: presenter,
-      price: price,
-    })
-      .then((event) => res.json(event))
-      .catch((err) => res.json(err));
-  } catch (error) {
-    console.log("error>>", error);
-    res.json(error);
-  }
-});
-
-//Read all Event data
-app.get("/admin/event", (req, res) => {
-  Event.find()
-    .then((data) => {
-      let evs = data.map((item, idx) => {
-        return {
-          eventId: item.eventId,
-          title: item.title,
-          loc: item.venue,
-          date: item.dateTime,
-          desc: item.desc,
-          presenter: item.presenter,
-          price: item.price,
-        };
-      });
-      res.status(200);
-      res.send(evs);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(406);
-      res.send(err);
-    });
-});
-
-// Delete User data
-app.delete("/deleteevnet/:eventId", (req, res) => {
+app.delete("/admin/event/delete/:eventId", (req, res) => {
   Event.findOneAndDelete({ eventId: req.params["eventId"] })
     .then((data) => {
       if (data) {
@@ -883,7 +734,7 @@ app.delete("/deleteevnet/:eventId", (req, res) => {
 });
 
 // Update Event Data
-app.put("/updateevent/:eventId", (req, res) => {
+app.put("/admin/event/update/:eventId", (req, res) => {
   const updatedData = req.body;
 
   if (
@@ -912,6 +763,71 @@ app.put("/updateevent/:eventId", (req, res) => {
       res.setHeader("Content-Type", "text/plain");
       res.status(500).send("Internal Server Error");
       console.log(error);
+    });
+});
+
+app.post("/admin/event/create", async (req, res) => {
+  try {
+    const { formData: values } = req.body;
+    console.log("values>>", values);
+    const eventid = values.eventId ? values.eventId : "";
+    const title = values.title ? values.title : "";
+    const venue = values.loc ? values.loc : "";
+    const dateTime = values.date ? values.date : "";
+    const description = values.desc ? values.desc : "";
+    const presenter = values.presenter ? values.presenter : "";
+    const price = values.price ? values.price : "";
+    console.log("eventID>> ", eventid);
+    console.log("title>> ", title);
+    console.log("venue>> ", venue);
+    console.log("dateTime>> ", dateTime);
+    console.log("description>> ", description);
+    console.log("presenter>> ", presenter);
+    console.log("price>> ", price);
+
+    if (!eventid || !title || !venue || !dateTime || !description || !presenter || !price) {
+      return res.status(406).send("Field missing");
+    }
+
+    Event.create({
+      eventId: eventid,
+      title: title,
+      loc: venue,
+      date: dateTime,
+      desc: description,
+      presenter: presenter,
+      price: price,
+    })
+      .then((event) => res.json(event))
+      .catch((err) => res.json(err));
+  } catch (error) {
+    console.log("error>>", error);
+    res.json(error);
+  }
+});
+
+//Read all Event data
+app.get("/admin/event", (req, res) => {
+  Event.find()
+    .then((data) => {
+      let evs = data.map((item, idx) => {
+        return {
+          eventId: item.eventId,
+          title: item.title,
+          loc: item.venue,
+          date: item.dateTime,
+          desc: item.desc,
+          presenter: item.presenter,
+          price: item.price,
+        };
+      });
+      res.status(200);
+      res.send(evs);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(406);
+      res.send(err);
     });
 });
 
