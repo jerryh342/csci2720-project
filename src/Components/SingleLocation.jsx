@@ -63,7 +63,7 @@ function EventDetails() {
       });
   }
   function getFreeEvents() {
-    setFreeEvents(events.filter((item) => item.price == "Free admission by tickets"));
+    setFreeEvents(events.filter((item) => item.price == "Free admission by tickets" || "Free Admission"));
   }
   const columns = [
     {
