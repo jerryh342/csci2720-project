@@ -1,9 +1,9 @@
-// import UseAuth from '../hooks/auth';
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HomeOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
-import { Breadcrumb, Layout, Menu, theme } from "antd";
+import { Breadcrumb, Layout, Menu, theme, Row, Col } from "antd";
+import { FaHeart } from "react-icons/fa6";
 const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
 
@@ -43,7 +43,7 @@ const NavBar = (props) => {
     };
     checkAuth();
   }, []);
-  console.log("user>>", user);
+  // console.log("user>>", user);
   if (!user) {
     return (
       <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "space-between" }}>
@@ -55,19 +55,34 @@ const NavBar = (props) => {
     );
   } else {
     return (
+      
       <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "space-between" }}>
-        <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
+        <Row justify="space-evenly">
+        <Col>
+        <Menu.Item key="left-item" style={{ marginRight: "100" }}>
           {component}
         </Menu.Item>
-        <Menu.Item key="venue" style={{ marginLeft: 100, marginRight: 100 }} onClick={() => navigate("/venue")}>
+        </Col>
+        <Col>
+        <Menu.Item key="venue" onClick={() => navigate("/venue")}>
           <HomeOutlined style={{ marginRight: 10 }} />
           Venues
         </Menu.Item>
-        <Menu.Item key="invites" style={{ marginLeft: 100, marginRight: 100 }} onClick={() => navigate("/invites")}>
+        </Col>
+        <Col>
+        <Menu.Item key="favourites" >
+          <FaHeart style={{ marginRight: 10 }}/>
+          Favourites
+        </Menu.Item>
+        </Col>
+        <Col>
+        <Menu.Item key="invites" onClick={() => navigate("/invites")}>
           <MailOutlined style={{ marginRight: 10 }} />
           Event Invitations
         </Menu.Item>
-        <Menu.Item key="right-item" style={{ marginLeft: "auto" }} disableactive>
+        </Col>
+        <Col>
+        <Menu.Item key="right-item" style={{ marginLeft: "100" }}>
           <SubMenu key="SubMenu" icon={<UserOutlined />} title={user.username}>
             <Menu.Item key="setting:1" onClick={logOut}>
               Logout
@@ -77,7 +92,10 @@ const NavBar = (props) => {
             </Menu.Item>
           </SubMenu>
         </Menu.Item>
+        </Col>
+        </Row>
       </Menu>
+      
     );
   }
 };

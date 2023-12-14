@@ -87,7 +87,9 @@ const LoginSchema = new Schema({
   email: { type: String, required: true },
   password: { type: String, required: true },
   invitations: { type: [Schema.Types.ObjectId], ref: "Invite", default: [] },
-  role: {type: String, required: true, enum: ['admin', 'user'], required: true, default: "user"}
+  role: {type: String, enum: ['admin', 'user'], required: true, default: "user"}, 
+  fav: {type: Array, required: true, default:[]}
+
 });
 
 const InviteSchema = new Schema({
@@ -96,8 +98,14 @@ const InviteSchema = new Schema({
   users: { type: [Schema.Types.ObjectId], ref: "login", default: [] },
 });
 
+const FavVenueSchema = new Schema({
+  user: { type: Schema.Types.ObjectId, ref: "login" },
+  venue: { type: Schema.Types.ObjectId, ref: "venue" },
+});
+
 exports.EventSchema = EventSchema;
 exports.LoginSchema = LoginSchema;
 exports.CommentSchema = CommentSchema;
 exports.VenueSchema = VenueSchema;
 exports.InviteSchema = InviteSchema;
+exports.FavVenueSchema = FavVenueSchema;
