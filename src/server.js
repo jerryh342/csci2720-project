@@ -779,7 +779,8 @@ app.put("/admin/event/update/:eventId", (req, res) => {
 
 app.post("/admin/event/create", async (req, res) => {
   try {
-    const { formData: values } = req.body;
+    //const { formData: values } = req.body;
+    const values = req.body;
     console.log("values>>", values);
     const eventid = values.eventId ? values.eventId : "";
     const title = values.title ? values.title : "";
@@ -803,8 +804,8 @@ app.post("/admin/event/create", async (req, res) => {
     Event.create({
       eventId: eventid,
       title: title,
-      loc: venue,
-      date: dateTime,
+      venue: venue,
+      dateTime: dateTime,
       desc: description,
       presenter: presenter,
       price: price,
