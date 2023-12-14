@@ -194,25 +194,44 @@ db.once("open", function () {
 //     .catch((err)=>console.log("err>>>", err))
 // })
 
-app.post("/addFavbyUser", (req, res) => {
+app.post("/addFavbyUser", async (req, res) => {
   const favlocid = req.body?.locid || "";
   const user = req.body?.username || "";
   if (!favlocid || !user) {
-    return res.status(404).send("Field missing")
+    return res.status(404).send("Field missing");
   }
-  LoginModel.findOneAndUpdate(
-    { username: user },
-    { $push: { fav: parseInt(favlocid) } },
-    { new: true }
-  )
-    .then((addResult) => {
-      res.status(201).send(addResult)
-    })
-    .catch(err => {
-      console.log("err>>", err)
-      res.status(500).status(err)
-    })
-})
+
+  try {
+    const loginDoc = await LoginModel.findOne({ username: user });
+
+    if (!loginDoc) {
+      return res.status(404).send("User not found");
+    }
+
+    const favArray = loginDoc.fav;
+
+    if (favArray.includes(parseInt(favlocid))) {
+      // Remove favlocid from fav array
+      const updatedDoc = await LoginModel.findOneAndUpdate(
+        { username: user },
+        { $pull: { fav: parseInt(favlocid) } },
+        { new: true }
+      );
+      res.status(201).send(updatedDoc);
+    } else {
+      // Add favlocid to fav array
+      const updatedDoc = await LoginModel.findOneAndUpdate(
+        { username: user },
+        { $addToSet: { fav: parseInt(favlocid) } },
+        { new: true }
+      );
+      res.status(201).send(updatedDoc);
+    }
+  } catch (err) {
+    console.log("err>>", err);
+    res.status(500).send(err);
+  }
+});
 
 // get users data
 app.get("/admin/user", (req, res) => {
