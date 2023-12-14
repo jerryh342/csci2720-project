@@ -3,8 +3,7 @@ import axios from "axios";
 import { Card, Descriptions, Button, Form, Input, Alert, List } from "antd";
 import NavBar from "./navbar";
 function getUsername() {
-  const item = JSON.parse(sessionStorage.getItem("username"));
-  return item.value;
+  return JSON.parse(sessionStorage.getItem("username"))?.value || "";
 }
 
 function Invite(props) {

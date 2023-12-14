@@ -15,7 +15,7 @@ class Locations extends Component {
       filteredLocations: [],
       isLoadingData: true,
       userFavList: [],
-      lastUpdatedTime: JSON.parse(sessionStorage.getItem("lastUpdatedTime")).value,
+      lastUpdatedTime: JSON.parse(sessionStorage.getItem("lastUpdatedTime"))?.value || '',
     };
 
     this.searchLocation = this.searchLocation.bind(this);
