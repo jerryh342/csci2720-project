@@ -6,35 +6,9 @@ import { AppstoreOutlined, MailOutlined, SettingOutlined, UserOutlined } from '@
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
 const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
-const menuItems = [
-  {
-    key: '1',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" href="http://www.alipay.com/">
-        General
-      </a>
-    ),
-  },
-  {
-    key: '2',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" href="http://www.taobao.com/">
-        Layout
-      </a>
-    ),
-  },
-  {
-    key: '3',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" href="http://www.tmall.com/">
-        Navigation
-      </a>
-    ),
-  },
-];
 
-const NavBar = () => {
-  // const user = UseAuth()
+const NavBar = (props) => {
+  const { component } =props
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -67,7 +41,7 @@ const NavBar = () => {
 
       <Menu mode="horizontal" theme="dark" style={{ display: 'flex', justifyContent: 'space-between' }}>
         <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
-          CSCI 2720 Project
+          {component}
         </Menu.Item>
         <Menu.Item key="right-item" style={{ marginLeft: 'auto' }} icon={<UserOutlined />}>
           Guest
@@ -79,7 +53,7 @@ const NavBar = () => {
     return (
       <Menu mode="horizontal" theme="dark" style={{ display: 'flex', justifyContent: 'space-between' }}>
         <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
-          CSCI 2720 Project
+          {component}
         </Menu.Item>
         <Menu.Item key="right-item" style={{ marginLeft: 'auto' }} disableActive>
           <SubMenu key="SubMenu" icon={<UserOutlined />} title={user.username}>
@@ -93,7 +67,11 @@ const NavBar = () => {
         </Menu.Item>
       </Menu>
     );
-  }
+  } 
+};
+
+NavBar.defaultProps = {
+  component: "CSCI 2720 project"
 };
 
 export default NavBar;
