@@ -80,6 +80,27 @@ db.once("open", function () {
     });
   });
 
+  app.post("/userbyusername", (req, res) => {
+    const user = req.body?.username || "";
+    if (!user) {
+      return req.status(500).send("User missing")
+    }
+    LoginModel.findOne({ username: user })
+      .then(user => {
+        if (user) {
+          const favValueArr = user.fav;
+          console.log('Favorite value:', favValueArr);
+          res.status(200).send(favValueArr)
+        } else {
+          console.log('User not found');
+          return res.status(404).send("User missing")
+        }
+      })
+      .catch(error => {
+        res.status(404).send('Error finding user:', error);
+      });
+  })
+
   app.get("/lcsdevents", async (req, res) => {
     try {
       const result = await fetchXML.getXML();
@@ -167,13 +188,38 @@ db.once("open", function () {
 //   .then((result=>console.log("result>>>", result)))
 //   .catch((err)=>console.log("err>>>", err))
 // })
+// app.get ("/addFav", (req, res)=>{
+//   LoginModel.updateMany({ fav: { $exists: false } }, { $set: { fav: [] } })
+//     .then((result=>console.log("result>>>", result)))
+//     .catch((err)=>console.log("err>>>", err))
+// })
+
+app.post("/addFavbyUser", (req, res) => {
+  const favlocid = req.body?.locid || "";
+  const user = req.body?.username || "";
+  if (!favlocid || !user) {
+    return res.status(404).send("Field missing")
+  }
+  LoginModel.findOneAndUpdate(
+    { username: user },
+    { $push: { fav: parseInt(favlocid) } },
+    { new: true }
+  )
+    .then((addResult) => {
+      res.status(201).send(addResult)
+    })
+    .catch(err => {
+      console.log("err>>", err)
+      res.status(500).status(err)
+    })
+})
 
 // get users data
 app.get("/admin/user", (req, res) => {
   LoginModel.find()
     .then((data) => {
       let users = data.map((item, idx) => {
-        return { id: item._id, name: item.username, email: item.email, pw: item.password };
+        return { id: item._id, name: item.username, email: item.email, pw: item.password, fav: item.fav };
       });
       res.status(200);
       res.send(users);
@@ -379,7 +425,7 @@ app.put("/invites/update/:eventId", async (req, res) => {
     if (invite.users.length !== 0) {
       invite
         .save()
-        .then(() => {})
+        .then(() => { })
         .catch((err) => {
           console.log(err);
           console.log("test");
@@ -387,7 +433,7 @@ app.put("/invites/update/:eventId", async (req, res) => {
       msg = invite;
     } else {
       Invite.findByIdAndDelete(invite._id)
-        .then(() => {})
+        .then(() => { })
         .catch((err) => {
           console.log(err);
         });

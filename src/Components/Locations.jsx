@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { Table, Input } from "antd";
+import { Table, Input, Button } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import Map from "./Map";
 import NavBar from "./navbar";
+import { StarOutlined } from '@ant-design/icons';
+import { FaStar } from "react-icons/fa";
 
 class Locations extends Component {
   constructor(props) {
@@ -12,6 +14,7 @@ class Locations extends Component {
       locationList: [],
       filteredLocations: [],
       isLoadingData: true,
+      userFavList: []
     };
 
     this.searchLocation = this.searchLocation.bind(this);
@@ -20,6 +23,7 @@ class Locations extends Component {
   //invoked for each set state(only called once => new class + new componentdidmount)
   componentDidMount() {
     this.LoadLocationList();
+    this.loadUserFavLoc();
   }
 
   // load all locations in a table
@@ -58,6 +62,50 @@ class Locations extends Component {
       this.setState({ filteredLocations });
     }
   }
+  handleFilter(){
+    const fitleredLoc = this.state.filteredLocations.filter(loc=>{
+      console.log("loc>>", loc)
+      console.log("this.state.userFavList>>", this.state.userFavList)
+      return this.state.userFavList.includes(parseInt(loc.locid))
+    })
+    this.setState({filteredLocations: fitleredLoc})
+  }
+
+  loadUserFavLoc(){
+    const usernameValue = JSON.parse(sessionStorage.getItem("username"))?.value || "";
+    axios({
+      url: `http://localhost:8000/userbyusername`,
+      method: "POST",
+      withCredentials: true,
+      data: {username: usernameValue}
+    })
+    .then((resp)=>{
+      console.log("resp>>", resp)
+      this.setState({userFavList: resp.data})
+    })
+    .catch((err)=>{
+      console.log("err", err)
+    })
+  }
+
+  handleFavClick (record){
+    this.setState({ isLoadingData: true });
+    const usernameValue = JSON.parse(sessionStorage.getItem("username"))?.value || "";
+    console.log("record>", record)
+    axios({
+      url: "http://localhost:8000/addFavbyUser",
+      method: "POST",
+      withCredentials: true,
+      data: {
+        username: usernameValue,
+        locid: record.locid
+      }
+    })
+    .then((result)=>{
+      this.LoadLocationList()
+      this.loadUserFavLoc()
+    })
+  }
 
   render() {
     const columns = [
@@ -88,6 +136,23 @@ class Locations extends Component {
         key: "eventCount",
         sorter: (a, b) => a.eventCount - b.eventCount,
         sortDirections: ["descend", "ascend"],
+      },
+      {
+        title:  <div onClick={() => this.handleFilter()}>Favourites</div>,
+        dataIndex: "fav",
+        key: "fav",
+        render: (fav, rowRecord) => (
+          <Button 
+          icon={<FaStar 
+          color={this.state.userFavList.includes(parseInt(rowRecord.locid)) ? 'yellow' :"white" }
+          style={{ stroke: "black", strokeWidth: "10"}}
+          />} 
+          type="text"
+          onClick={()=>this.handleFavClick(rowRecord)}
+          />
+        )
+          
+        
       },
     ];
 
