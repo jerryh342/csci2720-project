@@ -705,7 +705,7 @@ app.delete("/deleteevnet/:eventId", (req, res) => {
     });
 });
 
-// Update User Data
+// Update Event Data
 app.put("/updateevent/:eventId", (req, res) => {
   const updatedData = req.body;
 
@@ -728,68 +728,6 @@ app.put("/updateevent/:eventId", (req, res) => {
       res.setHeader("Content-Type", "text/plain");
       res.status(500).send("Internal Server Error");
       console.log(error);
-    });
-});
-
-//Get all events
-app.get("/ev", (req, res) => {
-  res.setHeader("Content-Type", "application/json");
-  Event.find({})
-    .then((data) => {
-      const output = [];
-      for (length in data) {
-        output.push({
-          eventId: data[length].eventId,
-          title: data[length].title,
-          venueId: data[length].venue.venueId,
-          dateTime: data[length].dateTime,
-          desc: data[length].desc,
-          presenter: data[length].presenter,
-          price: data[length].price,
-        });
-      }
-      res.status(200).send(output);
-    })
-    .catch((err) => {
-      res.setHeader("Content-Type", "text/plain");
-      console.log(err);
-      res.status(500).send("Internal Server Error");
-    });
-});
-
-//Create Event data
-app.post("/ev", (req, res) => {
-  const venueId = req.body.venueId;
-  Venue.findOne({ venueId: venueId })
-    .then((venueData) => {
-      Event.findOne({})
-        .sort({ eventId: -1 })
-        .limit(1)
-        .then((data) => {
-          const newMax = data.eventId + 1;
-          let newEvent = new Event({
-            eventId: newMax,
-            title: req.body.title,
-            venue: venueData._id,
-            dateTime: data.dateTime,
-            desc: data.desc,
-            presenter: data.presenter,
-            price: req.body.price,
-          });
-          newEvent
-            .save()
-            .then(() => {
-              res.status(201).send(`http://localhost:3000/ev/${newMax}`);
-              console.log("a new event created successfully");
-            })
-            .catch((error) => {
-              console.log("failed to save new event");
-            });
-        });
-    })
-    .catch((err) => {
-      res.setHeader("Content-Type", "text/plain");
-      res.status(500).send("Internal Server Error");
     });
 });
 
