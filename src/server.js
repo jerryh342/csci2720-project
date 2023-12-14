@@ -709,7 +709,7 @@ app.delete("/deleteevnet/:eventId", (req, res) => {
 app.put("/updateevent/:eventId", (req, res) => {
   const updatedData = req.body;
 
-  if (!updatedData.title || !updatedData.venue || !updatedData.dataTime || !updatedData.desc || !updatedData.presenter || !updatedData.price) {
+  if (!updatedData.title || !updatedData.loc || !updatedData.date || !updatedData.desc || !updatedData.presenter || !updatedData.price) {
     res.setHeader("Content-Type", "text/plain");
     res.status(400).send("Request body must include all fields.");
     return;
