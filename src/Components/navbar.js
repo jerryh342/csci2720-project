@@ -8,7 +8,7 @@ const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
 
 const NavBar = (props) => {
-  const { component } =props
+  const { component } = props;
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,7 +19,14 @@ const NavBar = (props) => {
       url: "http://localhost:8000/logout",
       withCredentials: true,
     })
-      .then(() => sessionStorage.removeItem("user"))
+      .then((res) => {
+        if (res.status === 200) {
+          console.log("Logged out");
+          sessionStorage.clear();
+          navigate("/login");
+        }
+      })
+
       .catch((err) => {
         return navigate("/login");
       });
@@ -39,18 +46,16 @@ const NavBar = (props) => {
   console.log("user>>", user);
   if (!user) {
     return (
-      <Menu mode="horizontal" theme="dark" style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "space-between" }}>
         <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
           {component}
         </Menu.Item>
-        <Menu.Item key="right-item" style={{ marginLeft: 'auto' }} icon={<UserOutlined />}>
-
+        <Menu.Item key="right-item" style={{ marginLeft: "auto" }} icon={<UserOutlined />} />
       </Menu>
     );
   } else {
     return (
-
-      <Menu mode="horizontal" theme="dark" style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "space-between" }}>
         <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
           {component}
         </Menu.Item>
@@ -74,11 +79,11 @@ const NavBar = (props) => {
         </Menu.Item>
       </Menu>
     );
-  } 
+  }
 };
 
 NavBar.defaultProps = {
-  component: "CSCI 2720 project"
+  component: "CSCI 2720 project",
 };
 
 export default NavBar;

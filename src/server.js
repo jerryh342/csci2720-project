@@ -98,12 +98,12 @@ db.once("open", function () {
       const username = values.username ? values.username : "";
       const email = "test@cuhk.edu.hk";
       const password = values.password ? await bcrypt.hash(values.password, 10) : "";
-      const role = values.role ? values.role : "user"
+      const role = values.role ? values.role : "user";
       console.log("username>> ", username);
       console.log("email>> ", email);
       console.log("password>> ", password);
 
-      if (!username || !email || !password ||!role) {
+      if (!username || !email || !password || !role) {
         return res.status(406).send("Field missing");
       }
 
@@ -111,7 +111,7 @@ db.once("open", function () {
         username: username,
         email: email,
         password: password,
-        role: role
+        role: role,
       })
         .then((user) => res.json(user))
         .catch((err) => res.json(err));
@@ -126,7 +126,7 @@ db.once("open", function () {
       if (err) {
         return next(err);
       }
-      res.redirect("/login");
+      res.status(200).send("OK");
     });
   });
 
