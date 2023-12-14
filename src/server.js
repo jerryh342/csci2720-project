@@ -730,7 +730,7 @@ app.get("/invites", (req, res) => {
 app.delete("/admin/event/delete/:eventId", (req, res) => {
   Event.findOneAndDelete({ eventId: req.params["eventId"] })
     .then((data) => {
-      if (data.deletedCount === 1) {
+      if (data) {
         res.sendStatus(204);
       } else {
         res.setHeader("Content-Type", "text/plain");
@@ -739,6 +739,7 @@ app.delete("/admin/event/delete/:eventId", (req, res) => {
       }
     })
     .catch((error) => {
+      console.log(error);
       res.setHeader("Content-Type", "text/plain");
       res.status(500).send("Internal Server Error");
     });
@@ -751,7 +752,7 @@ app.put("/admin/event/update/:eventId", (req, res) => {
   if (
     !updatedData.title ||
     !updatedData.venue ||
-    !updatedData.dataTime ||
+    !updatedData.dateTime ||
     !updatedData.desc ||
     !updatedData.presenter ||
     !updatedData.price
@@ -779,8 +780,7 @@ app.put("/admin/event/update/:eventId", (req, res) => {
 
 app.post("/admin/event/create", async (req, res) => {
   try {
-    //const { formData: values } = req.body;
-    const values = req.body;
+    const { formData: values } = req.body;
     console.log("values>>", values);
     const eventid = values.eventId ? values.eventId : "";
     const title = values.title ? values.title : "";
@@ -826,8 +826,8 @@ app.get("/admin/event", (req, res) => {
         return {
           eventId: item.eventId,
           title: item.title,
-          loc: item.venue,
-          date: item.dateTime,
+          venue: item.venue,
+          dateTime: item.dateTime,
           desc: item.desc,
           presenter: item.presenter,
           price: item.price,
@@ -840,50 +840,6 @@ app.get("/admin/event", (req, res) => {
       console.log(err);
       res.status(406);
       res.send(err);
-    });
-});
-
-// Delete event data
-app.delete("/deleteevnet/:eventId", (req, res) => {
-  Event.findOneAndDelete({ eventId: req.params['eventId'] })
-    .then((data) => {
-      if (data) {
-        res.sendStatus(204);
-      } else {
-        res.setHeader("Content-Type", "text/plain");
-        res.status(404).send("Event was not found, no event was deleted.");
-        console.log("Event was not found, no event was deleted.");
-      }
-    })
-    .catch((error) => {
-      res.setHeader("Content-Type", "text/plain");
-      res.status(500).send("Internal Server Error");
-    });
-});
-
-// Update Event Data
-app.put("/updateevent/:eventId", (req, res) => {
-  const updatedData = req.body;
-
-  if (!updatedData.eventId || !updatedData.title || !updatedData.loc || !updatedData.date || !updatedData.desc || !updatedData.presenter || !updatedData.price) {
-    res.setHeader("Content-Type", "text/plain");
-    res.status(400).send("Request body must include all fields.");
-    return;
-  }
-
-  Event.findOneAndUpdate({ eventId: req.params.eventId }, updatedData, { new: true })
-      .then((data) => {
-      if (data) {
-        res.json(data);
-      } else {
-        res.setHeader("Content-Type", "text/plain");
-        res.status(404).send("Event not found.");
-      }
-    })
-    .catch((error) => {
-      res.setHeader("Content-Type", "text/plain");
-      res.status(500).send("Internal Server Error");
-      console.log(error);
     });
 });
 

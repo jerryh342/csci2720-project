@@ -29,37 +29,6 @@ function CreateEventForm() {
     setIsModalOpen(false);
   };
 
-  /*async function addEvent(values) {
-    console.log("submit");
-    console.log("values>>", formData);
-    if (
-      formData.EventID == null ||
-      formData.Title == null ||
-      formData.Venue == null ||
-      formData.Date == null ||
-      formData.Description == null ||
-      formData.Presenter == null ||
-      formData.Price == null
-    ) {
-      form.resetFields();
-      console.log("reset");
-      return;
-    }
-    console.log(form);*/
-
-  /*console.log("Success:", values);
-    try {
-      const postResult = await axios.post("http://localhost:8000/createevent", { formData });
-      console.log("postResult>>", postResult);
-      if (postResult.status === 200) {
-        this.setState({ showForm: false });
-        this.loadEventList();
-      }
-    } catch (error) {
-      console.log("error>>", error);
-    }
-  }*/
-
   return (
     <>
       <Button type="primary" onClick={showModal}>
@@ -98,12 +67,16 @@ function CreateEventForm() {
 class Event extends Component {
   constructor(props) {
     super(props);
+    this.formRef = React.createRef();
     this.state = {
       eventList: [],
       editingKey: "",
       editingValues: {},
       allowInput: false,
       isButtonEnabled: true,
+      form: null,
+      isModalOpen: false,
+      isDelModalOpen: false,
     };
   }
 
@@ -126,62 +99,92 @@ class Event extends Component {
       });
   }
 
-  // // Validate the form
-  // onFinishFailed = (errorInfo) => {
-  //     console.log("Failed:", errorInfo);
-  // };
-
-  // // Add an event
-  // addEvent = async (values) =>{
-  //     const [formData] = useState({
-  //       EventID: "",
-  //       Title: "",
-  //       Venue: "",
-  //       Date: "",
-  //       Description: "",
-  //       Presenter: "",
-  //       Price: "",
-  //     });
-  //     console.log("submit")
-  //     console.log("values>>", formData)
-  //     // if (formData.EventID==null || formData.Title==null ||formData.Venue==null ||formData.Date==null ||formData.Description ==null ||formData.Presenter ==null ||formData.Price==null){
-  //     //     setShowErr(true)
-  //     //     form.resetFields();
-  //     //     console.log("reset")
-  //     //     return
-  //     // }
-
-  //     console.log("Success:", values);
-  //     try {
-  //       const postResult = await axios.post("http://localhost:8000/createevent", { formData });
-  //       console.log("postResult>>", postResult);
-  //       if (postResult.status === 200) {
-  //         this.setState({showForm: false});
-  //         this.loadEventList();
-  //     }
-  //     } catch (error) {
-  //       console.log("error>>", error);
-  //     }
-  // }
-
+  addEvent = (value) => {
+    this.formRef.current
+      .validateFields()
+      .then((values) => {
+        console.log("Success:", values);
+        axios
+          .post("/createevent", values)
+          .then((response) => {
+            console.log("Server response:", response);
+            this.setState({ allowInput: false, isButtonEnabled: true });
+            this.loadEventList();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      })
+      .catch((errorInfo) => {
+        console.log("Failed:", errorInfo);
+      });
+  };
   // Edit an event
   editEvent = (e) => {
-    this.setState({ isModalOpen: true });
-    this.setState({
-      editingKey: e.eventId,
-      editingValues: {
-        title: e.title,
-        loc: e.loc,
-        date: e.date,
-        desc: e.desc,
-        presenter: e.presenter,
-        price: e.price,
+    this.setState(
+      {
+        editingKey: e.eventId,
+        editingValues: {
+          title: e.title,
+          venue: e.venue,
+          dateTime: e.dateTime,
+          desc: e.desc,
+          presenter: e.presenter,
+          price: e.price,
+        },
       },
-    });
+      () => {
+        console.log(this.state.editingKey);
+        console.log(this.state.editingValues);
+        this.setState({ isModalOpen: true });
+      }
+    );
   };
 
   // Update an event
   updateEvent = (key) => {
+    const updateData = key;
+
+    key = key.eventId;
+
+    axios({
+      url: `http://localhost:8000/admin/event/update/${key}`,
+      method: "PUT",
+      data: updateData,
+    })
+      .then((r) => {
+        console.log(r.data);
+        // Update the user list with the updated user data
+        this.loadEventList();
+        this.setState({ isModalOpen: false });
+        this.setState((prevState) => ({
+          editingKey: "",
+          editingValues: {},
+        }));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  handleOk = () => {
+    this.formRef.current.submit();
+  };
+  handleCancel = () => {
+    this.setState({
+      isModalOpen: false,
+      isDelModalOpen: false,
+    });
+  };
+
+  handleDelCancel = () => {
+    this.setState({
+      isModalOpen: false,
+      isDelModalOpen: false,
+    });
+  };
+  // Update an event
+  handleOK = (key) => {
     const updateData = key;
 
     key = key.eventId;
@@ -205,11 +208,10 @@ class Event extends Component {
       });
   };
 
-  // Delete an event
+  /// Delete an event
   deleteEvent = (e) => {
     axios({
-      // need change localhost to the publicIP
-      url: `http://localhost:8000/deleteevnet/${e}`,
+      url: `http://localhost:8000/admin/event/delete/${e}`,
       method: "DELETE",
     })
       .then((e) => {
@@ -218,7 +220,6 @@ class Event extends Component {
       })
       .catch((err) => console.log(err));
   };
-
   render() {
     const { editingKey, editingValues } = this.state;
     const columns = [
@@ -234,13 +235,13 @@ class Event extends Component {
       },
       {
         title: "Venue",
-        dataIndex: "loc",
-        key: "loc",
+        dataIndex: "venue",
+        key: "venue",
       },
       {
         title: "Date Time",
-        dataIndex: "date",
-        key: "date",
+        dataIndex: "dateTime",
+        key: "dateTime",
       },
       {
         title: "Event Description",
@@ -262,10 +263,20 @@ class Event extends Component {
         key: "operations",
         render: (text, record) => (
           <div>
-            <Button style={{ marginBottom: "10px" }} type="primary" onClick={() => this.editEvent(record)}>
-              Edit Event
-            </Button>
-            <Button type="primary" danger onClick={() => this.deleteEvent(record.name)}>
+            {editingKey === record.eventId ? (
+              <Button
+                style={{ marginBottom: "10px", backgroundColor: "green" }}
+                type="primary"
+                onClick={() => this.updateEvent(record)}
+              >
+                Update Event
+              </Button>
+            ) : (
+              <Button style={{ marginBottom: "10px" }} type="primary" onClick={() => this.editEvent(record)}>
+                Edit Event
+              </Button>
+            )}
+            <Button type="primary" danger onClick={() => this.deleteEvent(record.eventId)}>
               Delete Event
             </Button>
           </div>
@@ -353,10 +364,10 @@ class Event extends Component {
               <Form.Item name="title" label="Title" rules={[{ required: true, message: "Please input the title" }]}>
                 <TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
               </Form.Item>
-              <Form.Item name="loc" label="Venue" rules={[{ required: true, message: "Please input the venue" }]}>
+              <Form.Item name="venue" label="Venue" rules={[{ required: true, message: "Please input the venue" }]}>
                 <TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
               </Form.Item>
-              <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please input the date" }]}>
+              <Form.Item name="dateTime" label="Date" rules={[{ required: true, message: "Please input the date" }]}>
                 <TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
               </Form.Item>
               <Form.Item
