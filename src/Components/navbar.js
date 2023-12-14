@@ -1,4 +1,3 @@
-// import UseAuth from '../hooks/auth';
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -43,7 +42,7 @@ const NavBar = (props) => {
     };
     checkAuth();
   }, []);
-  console.log("user>>", user);
+  // console.log("user>>", user);
   if (!user) {
     return (
       <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "space-between" }}>
