@@ -8,22 +8,20 @@ function NoMatch(props) {
     return item !== null;
   }
   // Usage
-
+  const itemExists = isSessionStorageItemExists("username");
   useEffect(() => {
-    const itemExists = isSessionStorageItemExists("username");
-    if (itemExists) {
-      return (
-        <div>
-          <h1>Default landing page</h1>
-          <h1>404 Not Found</h1>
-        </div>
-      );
+    if (!itemExists) {
       // Item exists in sessionStorage
-    } else {
       navigate("/login");
       // Item does not exist in sessionStorage
     }
   });
+  return (
+    <div>
+      <h1>Default landing page</h1>
+      <h1>404 Not Found</h1>
+    </div>
+  );
 }
 
 export default NoMatch;
