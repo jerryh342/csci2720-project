@@ -1,9 +1,99 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Button, Input, Form } from "antd";
+import { Table, Button, Input, Form, Modal } from "antd";
 import { useForm } from "antd/lib/form/Form";
 import NavBar from "./navbar";
 import TextArea from "antd/es/input/TextArea";
+
+function CreateEventForm() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData] = useState({
+    EventID: "",
+    Title: "",
+    Venue: "",
+    Date: "",
+    Description: "",
+    Presenter: "",
+    Price: "",
+  });
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  /*async function addEvent(values) {
+    console.log("submit");
+    console.log("values>>", formData);
+    if (
+      formData.EventID == null ||
+      formData.Title == null ||
+      formData.Venue == null ||
+      formData.Date == null ||
+      formData.Description == null ||
+      formData.Presenter == null ||
+      formData.Price == null
+    ) {
+      form.resetFields();
+      console.log("reset");
+      return;
+    }
+    console.log(form);*/
+
+  /*console.log("Success:", values);
+    try {
+      const postResult = await axios.post("http://localhost:8000/createevent", { formData });
+      console.log("postResult>>", postResult);
+      if (postResult.status === 200) {
+        this.setState({ showForm: false });
+        this.loadEventList();
+      }
+    } catch (error) {
+      console.log("error>>", error);
+    }
+  }*/
+
+  return (
+    <>
+      <Button type="primary" onClick={showModal}>
+        Add New Event
+      </Button>
+      <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <Form>
+          <Form.Item name="EventID" label="Event ID" rules={[{ required: true }]}>
+            <TextArea placeholder="Event ID" />
+          </Form.Item>
+          <Form.Item name="Title" label="Title" rules={[{ required: true }]}>
+            <TextArea placeholder="Title" />
+          </Form.Item>
+          <Form.Item name="Venue" label="Venue" rules={[{ required: true }]}>
+            <TextArea placeholder="Location" />
+          </Form.Item>
+          <Form.Item name="Date" label="Date" rules={[{ required: true }]}>
+            <TextArea placeholder="Date and Time" />
+          </Form.Item>
+          <Form.Item name="Description" label="Description" rules={[{ required: true }]}>
+            <TextArea placeholder="Event Description" />
+          </Form.Item>
+          <Form.Item name="Presenter" label="Presenter" rules={[{ required: true }]}>
+            <TextArea placeholder="Presenter" />
+          </Form.Item>
+          <Form.Item name="Price" label="Price" rules={[{ required: true }]}>
+            <TextArea placeholder="Price" />
+          </Form.Item>
+          <Form.Item></Form.Item>
+        </Form>
+      </Modal>
+    </>
+  );
+}
 
 class Event extends Component {
   constructor(props) {
@@ -248,56 +338,10 @@ class Event extends Component {
       <main>
         <div>
           {/* <NavBar /> */}
-          <h1 style={{ textAlign: "left" }}>Manage Users</h1>
+          <h1 style={{ textAlign: "left" }}>Manage Events</h1>
         </div>
-        {this.state.isButtonEnabled && (
-          <Button
-            style={{ marginLeft: "7px", backgroundColor: "pink", marginBottom: "10px" }}
-            type="primary"
-            onClick={() => this.setState({ allowInput: true, isButtonEnabled: false })}
-          >
-            Add Event
-          </Button>
-        )}
-        {
-          <div style={{ clear: "both" }}>
-            {this.state.allowInput && (
-              <Form onFinish={this.addEvent}>
-                <Form.Item name="EventID" label="Event ID" rules={[{ required: true }]}>
-                  <TextArea placeholder="Event ID" />
-                </Form.Item>
-                <Form.Item name="Title" label="Title" rules={[{ required: true }]}>
-                  <TextArea placeholder="Title" />
-                </Form.Item>
-                <Form.Item name="Venue" label="Venue" rules={[{ required: true }]}>
-                  <TextArea placeholder="Location" />
-                </Form.Item>
-                <Form.Item name="Date" label="Date" rules={[{ required: true }]}>
-                  <TextArea placeholder="Date and Time" />
-                </Form.Item>
-                <Form.Item name="Description" label="Description" rules={[{ required: true }]}>
-                  <TextArea placeholder="Event Description" />
-                </Form.Item>
-                <Form.Item name="Presenter" label="Presenter" rules={[{ required: true }]}>
-                  <TextArea placeholder="Presenter" />
-                </Form.Item>
-                <Form.Item name="Price" label="Price" rules={[{ required: true }]}>
-                  <TextArea placeholder="Price" />
-                </Form.Item>
-                <Form.Item>
-                  <Button
-                    style={{ marginBottom: "10px" }}
-                    type="primary"
-                    htmlType="submit"
-                    onClick={() => this.addEvent()}
-                  >
-                    Add Event
-                  </Button>
-                </Form.Item>
-              </Form>
-            )}
-          </div>
-        }
+        <CreateEventForm />
+        {<div style={{ clear: "both" }}></div>}
         <div>
           <Table columns={columns} dataSource={this.state.eventList} rowKey="eventId" />
         </div>
