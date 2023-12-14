@@ -7,8 +7,8 @@ import { Breadcrumb, Layout, Menu, theme } from "antd";
 const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
 
-const NavBar = () => {
-  // const user = UseAuth()
+const NavBar = (props) => {
+  const { component } =props
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,18 +39,20 @@ const NavBar = () => {
   console.log("user>>", user);
   if (!user) {
     return (
-      <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "space-between" }}>
-        <Menu.Item key="left-item">CSCI 2720 Project Login Page</Menu.Item>
-        {/*<Menu.Item key="right-item" style={{ marginLeft: 'auto' }} icon={<UserOutlined />}>
-          Guest
-    </Menu.Item>*/}
+      <Menu mode="horizontal" theme="dark" style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
+          {component}
+        </Menu.Item>
+        <Menu.Item key="right-item" style={{ marginLeft: 'auto' }} icon={<UserOutlined />}>
+
       </Menu>
     );
   } else {
     return (
-      <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "space-between" }}>
-        <Menu.Item key="left-item" style={{ marginLeft: 50 }}>
-          CSCI 2720 Project
+
+      <Menu mode="horizontal" theme="dark" style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Menu.Item key="left-item" style={{ marginLeft: 100 }}>
+          {component}
         </Menu.Item>
         <Menu.Item key="venue" style={{ marginLeft: 100, marginRight: 100 }} onClick={() => navigate("/venue")}>
           <HomeOutlined style={{ marginRight: 10 }} />
@@ -72,7 +74,11 @@ const NavBar = () => {
         </Menu.Item>
       </Menu>
     );
-  }
+  } 
+};
+
+NavBar.defaultProps = {
+  component: "CSCI 2720 project"
 };
 
 export default NavBar;

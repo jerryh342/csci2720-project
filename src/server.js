@@ -98,11 +98,12 @@ db.once("open", function () {
       const username = values.username ? values.username : "";
       const email = "test@cuhk.edu.hk";
       const password = values.password ? await bcrypt.hash(values.password, 10) : "";
+      const role = values.role ? values.role : "user"
       console.log("username>> ", username);
       console.log("email>> ", email);
       console.log("password>> ", password);
 
-      if (!username || !email || !password) {
+      if (!username || !email || !password ||!role) {
         return res.status(406).send("Field missing");
       }
 
@@ -110,6 +111,7 @@ db.once("open", function () {
         username: username,
         email: email,
         password: password,
+        role: role
       })
         .then((user) => res.json(user))
         .catch((err) => res.json(err));
@@ -159,6 +161,12 @@ db.once("open", function () {
       .catch(() => res.status(500).send("Internal Server error"));
   });
 });
+
+// app.get("/addroles", (req, res)=>{
+//   LoginModel.updateMany({ role: { $exists: false } }, { $set: { role: 'admin' } })
+//   .then((result=>console.log("result>>>", result)))
+//   .catch((err)=>console.log("err>>>", err))
+// })
 
 // get users data
 app.get("/admin/user", (req, res) => {
