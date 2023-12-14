@@ -68,7 +68,18 @@ db.once("open", function () {
         req.logIn(user, async (err) => {
           if (err) throw err;
           const result = await fetchXML.getXML();
-          res.status(200).send(req.user);
+          const currentTime = new Date();
+          const timestamp =
+            currentTime.getFullYear() +
+            "/" +
+            (currentTime.getMonth() + 1) +
+            "/" +
+            currentTime.getDate() +
+            " " +
+            currentTime.getHours() +
+            ":" +
+            currentTime.getMinutes();
+          res.status(200).send({ user: req.user, timestamp: timestamp });
           console.log(req.user);
         });
       }

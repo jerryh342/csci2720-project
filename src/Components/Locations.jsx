@@ -15,7 +15,7 @@ class Locations extends Component {
       filteredLocations: [],
       isLoadingData: true,
       userFavList: [],
-      lastUpdatedTime: "",
+      lastUpdatedTime: JSON.parse(sessionStorage.getItem("lastUpdatedTime")).value,
     };
 
     this.searchLocation = this.searchLocation.bind(this);
@@ -211,6 +211,7 @@ class Locations extends Component {
         <div style={{ height: "500px", width: "100%" }}>
           {<Map venues={this.state.locationList} isSingleLocation={false} zoom={11} markerLink={true} />}
         </div>
+        <p style={{ textAlign: "right" }}>Last Updated at {this.state.lastUpdatedTime}</p>
         <div>
           <Input size="large" placeholder="Search" onChange={this.searchLocation} prefix={<SearchOutlined />} />
         </div>
