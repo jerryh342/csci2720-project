@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { Table, Button, Input } from "antd";
+import { Table, Button, Input, Collapse } from "antd";
 import NavBar from "./navbar";
 import { withRouter } from "react-router-dom";
-
+import { SignUp } from "./signup";
 class User extends Component {
   constructor(props) {
     super(props);
@@ -37,7 +37,7 @@ class User extends Component {
   editUser = (e) => {
     this.setState({
       editingKey: e.id,
-      editingValues: { username: e.name, pw: e.pw },
+      editingValues: { username: e.name, password: e.pw },
     });
   };
 
@@ -53,9 +53,10 @@ class User extends Component {
     })
       .then((r) => {
         console.log(r.data);
+        this.LoadUserList();
         // Update the user list with the updated user data
         this.setState((prevState) => ({
-          userList: prevState.userList.map((user) => (user._id === r.data.id ? r.data : user)),
+          //userList: prevState.userList.map((user) => (user._id === r.data.id ? r.data : user)),
           editingKey: "",
           editingValues: {},
         }));
@@ -64,7 +65,6 @@ class User extends Component {
         console.log(err);
       });
   };
-
   // Delete a user
   deleteUser = (e) => {
     const payload = {
@@ -108,8 +108,8 @@ class User extends Component {
         render: (text, record) =>
           editingKey === record.id ? (
             <Input
-              value={editingValues.pw}
-              onChange={(e) => this.setState({ editingValues: { ...editingValues, pw: e.target.value } })}
+              value={editingValues.password}
+              onChange={(e) => this.setState({ editingValues: { ...editingValues, password: e.target.value } })}
               style={{ width: 600 }}
             />
           ) : (
@@ -147,6 +147,16 @@ class User extends Component {
         <div>
           {/* <NavBar /> */}
           <h1 style={{ textAlign: "left" }}>Manage Users</h1>
+          <Collapse
+            size="large"
+            items={[
+              {
+                key: 1,
+                label: "Create new user",
+                children: <SignUp />,
+              },
+            ]}
+          ></Collapse>
           <Button style={{ float: "left", marginLeft: "7px", marginBottom: "10px" }} type="primary" href="/register">
             Create User
           </Button>
