@@ -1,19 +1,22 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Table, Button, Input, Form} from 'antd';
-import { useForm } from 'antd/lib/form/Form';
+import { Table, Button, Input, Form, Modal} from 'antd';
 import NavBar from "./navbar";
 import TextArea from 'antd/es/input/TextArea';
 
 class Event extends Component{
     constructor(props) {
         super(props);
+        this.formRef = React.createRef();
         this.state = {
             eventList: [],
             editingKey: '',
             editingValues: {},
             allowInput: false,
             isButtonEnabled: true,
+            form: null,
+            isModalOpen: false,
+            isDelModalOpen: false,
         };
     }
 
@@ -36,74 +39,71 @@ class Event extends Component{
         });
     }
 
-    // // Validate the form
-    // onFinishFailed = (errorInfo) => {
-    //     console.log("Failed:", errorInfo);
-    // };
-
-    // // Add an event
-    // addEvent = async (values) =>{
-    //     const [formData] = useState({
-    //       EventID: "",
-    //       Title: "",
-    //       Venue: "",
-    //       Date: "",
-    //       Description: "",
-    //       Presenter: "",
-    //       Price: "",
-    //     });
-    //     console.log("submit")
-    //     console.log("values>>", formData)
-    //     // if (formData.EventID==null || formData.Title==null ||formData.Venue==null ||formData.Date==null ||formData.Description ==null ||formData.Presenter ==null ||formData.Price==null){
-    //     //     setShowErr(true)
-    //     //     form.resetFields();
-    //     //     console.log("reset")
-    //     //     return
-    //     // }
-
-    //     console.log("Success:", values);
-    //     try {
-    //       const postResult = await axios.post("http://localhost:8000/createevent", { formData });
-    //       console.log("postResult>>", postResult);
-    //       if (postResult.status === 200) {
-    //         this.setState({showForm: false});
-    //         this.loadEventList();
-    //     }
-    //     } catch (error) {
-    //       console.log("error>>", error);
-    //     }
-    // }
-
-    // Edit an event
-    editEvent = (e) => {
-        this.setState({
-            editingKey: e.eventId,
-            editingValues: {
-                title: e.title, 
-                loc: e.loc, 
-                date: e.date, 
-                desc: e.desc, 
-                presenter: e.presenter, 
-                price: e.price
-            },
+    // Add an event
+    addEvent = (value) => {
+        this.formRef.current.validateFields()
+            .then(values => {
+            console.log('Success:', values);
+            axios.post('/createevent', values)
+            .then(response => {
+              console.log('Server response:', response);
+              this.setState({ allowInput: false, isButtonEnabled: true});
+              this.loadEventList();
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        })
+        .catch(errorInfo => {
+          console.log('Failed:', errorInfo);
         });
     };
 
+    editEvent = (e) => {
+        this.setState({
+          editingKey: e.eventId,
+          editingValues: {
+            title: e.title, 
+            loc: e.loc, 
+            date: e.date, 
+            desc: e.desc, 
+            presenter: e.presenter, 
+            price: e.price
+          },
+        }, () => {
+            console.log(this.state.editingKey);
+            console.log(this.state.editingValues);
+            this.setState({ isModalOpen: true });     
+        });
+      };
+    
+    handleOk = () => {
+        this.formRef.current.submit();
+    };
+    
+    handleCancel = () => {
+    this.setState({ isModalOpen: false, isDelModalOpen: false });
+    };
+
+    
+
     // Update an event
     updateEvent = (key) => {
-        const { editingValues } = this.state;
 
+        const updateData = key;
+        
         key = key.eventId; 
 
         axios({
             url: `http://localhost:8000/updateevent/${key}`,
             method: "PUT",
-            data: editingValues,
+            data: updateData,
         })
         .then((r) => {
             console.log(r.data);
-            this.loadEventList();
             // Update the user list with the updated user data
+            this.loadEventList();
+            this.setState({ isModalOpen: false });
             this.setState(prevState => ({
             editingKey: '',
             editingValues: {},
@@ -118,11 +118,12 @@ class Event extends Component{
     deleteEvent = (e) => {    
         axios({
             // need change localhost to the publicIP
-            url: `http://localhost:8000/deleteevnet/${e}`, 
+            url: `http://localhost:8000/deleteevent/${e}`, 
             method: "DELETE",
         })
         .then((e) => {
-            this.loadEventList();
+            this.setState({ isDelModalOpen: true });
+            this.loadEventList()
         })
         .catch((err) => console.log(err))
     }
@@ -139,110 +140,40 @@ class Event extends Component{
                 title: 'Event Name',
                 dataIndex: 'title',
                 key: 'title',
-                render: (text, record) => editingKey === record.eventId ? (
-                    <TextArea
-                    value={editingValues.title}
-                    onChange={(e) =>
-                        this.setState({ editingValues: { ...editingValues, title: e.target.value } })
-                    }
-                    />
-                ) : (
-                text
-                ),
             },
             {
                 title: 'Venue',
                 dataIndex: 'loc',
                 key: 'loc',
-                render: (text, record) => editingKey === record.eventId ? (
-                    <TextArea
-                    value={editingValues.loc}
-                    onChange={(e) =>
-                        this.setState({ editingValues: { ...editingValues, loc: e.target.value } })
-                    }
-                    />
-                ) : (
-                text
-                ),
             },
             {
                 title: 'Date Time',
                 dataIndex: 'date',
                 key: 'date',
-                render: (text, record) => editingKey === record.eventId ? (
-                    <TextArea
-                    value={editingValues.date}
-                    onChange={(e) =>
-                        this.setState({ editingValues: { ...editingValues, date: e.target.value } })
-                    }
-                    />
-                ) : (
-                text
-                ),
             },
             {
                 title: 'Event Description',
                 dataIndex: 'desc',
                 key: 'desc',
-                render: (text, record) => editingKey === record.eventId ? (
-                    <TextArea
-                    value={editingValues.desc}
-                    onChange={(e) =>
-                        this.setState({ editingValues: { ...editingValues, desc: e.target.value } })
-                    }
-                    />
-                ) : (
-                text
-                ),
             },
             {
                 title: 'Presenter',
                 dataIndex: 'presenter',
                 key: 'presenter',
-                render: (text, record) => editingKey === record.eventId ? (
-                    <TextArea
-                    value={editingValues.presenter}
-                    onChange={(e) =>
-                        this.setState({ editingValues: { ...editingValues, presenter: e.target.value } })
-                    }
-                    />
-                ) : (
-                text
-                ),
             },
             {
                 title: 'Price',
                 dataIndex: 'price',
                 key: 'price',
-                render: (text, record) => editingKey === record.eventId ? (
-                    <TextArea
-                    value={editingValues.price}
-                    onChange={(e) =>
-                        this.setState({ editingValues: { ...editingValues, price: e.target.value } })
-                    }
-                    />
-                ) : (
-                text
-                ),
             },
             {
                 title: "Operations",
                 key: "operations",
                 render: (text, record) => (
                   <div>
-                    {editingKey === record.eventId ? (
-                      <Button
-                        style={{ marginBottom: "10px", backgroundColor: "green" }}
-                        type="primary"
-                        onClick={() => this.updateEvent(record)}
-                      >
-                        Update Event
-                      </Button>
-                    ) : (
-                      <Button style={{ marginBottom: "10px" }} type="primary" onClick={() => this.editEvent(record)}>
-                        Edit Event
-                      </Button>
-                    )}
+                    <Button style={{ marginBottom: "10px" }} type="primary" onClick={() => this.editEvent(record)}>
+                    Edit Event
+                    </Button>
                     <Button type="primary" danger onClick={() => this.deleteEvent(record.name)}>
                       Delete Event
                     </Button>
@@ -261,25 +192,25 @@ class Event extends Component{
                 { <div style={{ clear: "both" }}>    
                 {this.state.allowInput && (
                 <Form onFinish={this.addEvent}>
-                    <Form.Item name="EventID" label="Event ID" rules={[{ required: true}]}>
+                    <Form.Item name="EventID" label="Event ID" rules={[{ required: true, message: "Please input the Event ID"}]}>
                     <TextArea placeholder="Event ID" />
                     </Form.Item>
-                    <Form.Item name="Title" label="Title" rules={[{ required: true}]}>
+                    <Form.Item name="Title" label="Title" rules={[{ required: true, message: "Please input the title"}]}>
                     <TextArea placeholder="Title" />
                     </Form.Item>
-                    <Form.Item name="Venue" label="Venue" rules={[{ required: true}]}>
+                    <Form.Item name="Venue" label="Venue" rules={[{ required: true, message: "Please input the venue"}]}>
                     <TextArea placeholder="Location" />
                     </Form.Item>
-                    <Form.Item name="Date" label="Date" rules={[{ required: true}]}>
+                    <Form.Item name="Date" label="Date" rules={[{ required: true, message: "Please input the date"}]}>
                     <TextArea placeholder="Date and Time" />
                     </Form.Item>
-                    <Form.Item name="Description" label="Description" rules={[{ required: true}]}>
+                    <Form.Item name="Description" label="Description" rules={[{ required: true, message: "Please input the description"}]}>
                     <TextArea placeholder="Event Description" />
                     </Form.Item>
-                    <Form.Item name="Presenter" label="Presenter" rules={[{ required: true}]}>
+                    <Form.Item name="Presenter" label="Presenter" rules={[{ required: true, message: "Please input the presenter"}]}>
                     <TextArea placeholder="Presenter" />
                     </Form.Item>
-                    <Form.Item name="Price" label="Price" rules={[{ required: true}]}>
+                    <Form.Item name="Price" label="Price" rules={[{ required: true, message: "Please input the price"}]}>
                     <TextArea  placeholder="Price" />
                     </Form.Item>
                     <Form.Item>
@@ -287,15 +218,46 @@ class Event extends Component{
                         style={{marginBottom: '10px'}} 
                         type="primary" 
                         htmlType="submit" 
-                        onClick={() => this.addEvent()}
                     >
-                    Add Event
+                    Submit
                     </Button>
                     </Form.Item>
                 </Form>
                 )}
                 </div>}
                 <div>
+                <Modal ref={this.formRef} title="Edit Event" open={this.state.isModalOpen} onOk={this.handleOk} onCancel={this.handleCancel}>
+                <Form ref={this.formRef} initialValues={{...this.state.editingValues, eventId: this.state.editingKey}} onFinish={this.updateEvent}>
+                    <Form.Item name="eventId" label="Event ID">
+                    <Input readOnly/>
+                    </Form.Item>
+                    <Form.Item name="title" label="Title" rules={[{ required: true, message: "Please input the title"}]}>
+                    <TextArea autoSize={{ minRows: 2, maxRows: 4 }}/>
+                    </Form.Item>
+                    <Form.Item name="loc" label="Venue" rules={[{ required: true, message: "Please input the venue"}]}>
+                    <TextArea autoSize={{ minRows: 2, maxRows: 4 }}/>
+                    </Form.Item>
+                    <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please input the date"}]}>
+                    <TextArea autoSize={{ minRows: 2, maxRows: 4 }}/>
+                    </Form.Item>
+                    <Form.Item name="desc" label="Description" rules={[{ required: true, message: "Please input the description"}]}>
+                    <TextArea autoSize={{ minRows: 3, maxRows: 10 }}/>
+                    </Form.Item>
+                    <Form.Item name="presenter" label="Presenter" rules={[{ required: true, message: "Please input the presenter"}]}>
+                    <TextArea autoSize={{ minRows: 2, maxRows: 4 }}/>
+                    </Form.Item>
+                    <Form.Item name="price" label="Price" rules={[{ required: true, message: "Please input the price"}]}>
+                    <TextArea autoSize={{ minRows: 2, maxRows: 4 }}/>
+                    </Form.Item>
+                </Form>
+                </Modal>
+                <Modal 
+                    title="Delete Event" 
+                    open={this.state.isDelModalOpen}
+                    onOk={this.handleDelCancel}
+                >
+                    Successfully deleted!
+                </Modal>
                 <Table columns={columns} dataSource={this.state.eventList} rowKey="eventId" />
                 </div>
             </main>
@@ -303,4 +265,3 @@ class Event extends Component{
     }
 }
 export default Event;
-
