@@ -149,14 +149,15 @@ db.once("open", function () {
     res.redirect("/login");
   }
 
-  app.get("/checkUsername", (req, res)=>{
-    LoginModel.find({}).then((result) => {
-      const usernames = result.map(obj => obj.username);
-      console.log("usernames>>", usernames)
-      res.status(200).send(usernames)
-    })
-    .catch(()=>res.status(500).send("Internal Server error"));
-  })
+  app.get("/checkUsername", (req, res) => {
+    LoginModel.find({})
+      .then((result) => {
+        const usernames = result.map((obj) => obj.username);
+        console.log("usernames>>", usernames);
+        res.status(200).send(usernames);
+      })
+      .catch(() => res.status(500).send("Internal Server error"));
+  });
 });
 
 // get users data
@@ -164,7 +165,7 @@ app.get("/admin/user", (req, res) => {
   LoginModel.find()
     .then((data) => {
       let users = data.map((item, idx) => {
-        return { id: item._id, name: item.username, email: item.email, pw: item.password};
+        return { id: item._id, name: item.username, email: item.email, pw: item.password };
       });
       res.status(200);
       res.send(users);
@@ -178,7 +179,7 @@ app.get("/admin/user", (req, res) => {
 
 // Delete User data
 app.delete("/deleteuser/:username", (req, res) => {
-  LoginModel.findOneAndDelete({ username: req.params['username'] })
+  LoginModel.findOneAndDelete({ username: req.params["username"] })
     .then((data) => {
       if (data) {
         res.sendStatus(204);
@@ -205,7 +206,7 @@ app.put("/updateuser/:id", (req, res) => {
   }
 
   LoginModel.findOneAndUpdate({ _id: req.params.id }, updatedData, { new: true })
-      .then((data) => {
+    .then((data) => {
       if (data) {
         res.json(data);
       } else {
@@ -497,6 +498,31 @@ app.get("/invites", (req, res) => {
       res.status(404).send(null);
     });
 });
+/*app.get("/ev/free/:venueId", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  Event.find({ price: "Free admission by tickets", venue: req.params.venueId })
+    .then((data) => {
+      console.log("Hi");
+      const output = [];
+      for (length in data) {
+        output.push({
+          eventId: data[length].eventId,
+          title: data[length].title,
+          venue: data[length].venue,
+          dateTime: data[length].dateTime,
+          desc: data[length].desc,
+          presenter: data[length].presenter,
+          price: data[length].price,
+        });
+      }
+      res.status(200).send(output);
+    })
+    .catch((err) => {
+      res.setHeader("Content-Type", "text/plain");
+      console.log(err);
+      res.status(500).send("Internal Server Error");
+    });
+});*/
 
 //Read Specific Event data
 app.get("/ev/:eventId", (req, res) => {
@@ -510,12 +536,7 @@ app.get("/ev/:eventId", (req, res) => {
         const eventData = {
           eventId: data.eventId,
           title: data.title,
-          venue: {
-            venueId: data.venue.venueId,
-            venueName: data.venue.venueName,
-            lat: data.venue.lat,
-            long: data.venue.long,
-          },
+          venue: data.venue,
           dateTime: data.dateTime,
           desc: data.desc,
           presenter: data.presenter,
@@ -554,65 +575,30 @@ app.get("/user/:userName", (req, res) => {
     });
 });
 
-//Read event with Price greater than p
+//Get all events
 app.get("/ev", (req, res) => {
-  if (req.query.p === undefined) {
-    Event.find({})
-      .populate("venue")
-      .then((data) => {
-        const output = [];
-        for (length in data) {
-          output.push({
-            eventId: data[length].eventId,
-            title: data[length].title,
-            venue: {
-              venueId: data[length].venue.venueId,
-              venueName: data[length].venue.venueName,
-              lat: data[length].venue.lat,
-              long: data[length].venue.long,
-            },
-            dateTime: data[length].dateTime,
-            desc: data[length].desc,
-            presenter: data[length].presenter,
-            price: data[length].price,
-          });
-        }
-        res.setHeader("Content-Type", "text/plain");
-        res.status(200).send(JSON.stringify(output, null, 2));
-      })
-      .catch((err) => {
-        res.setHeader("Content-Type", "text/plain");
-        res.status(500).send("Internal Server Error");
-      });
-  } else {
-    Event.find({ price: { $gte: req.query.p } })
-      .populate("venue")
-      .then((data) => {
-        const output = [];
-        for (length in data) {
-          output.push({
-            eventId: data[length].eventId,
-            title: data[length].title,
-            venue: {
-              venueId: data[length].venue.venueId,
-              venueName: data[length].venue.venueName,
-              lat: data[length].venue.lat,
-              long: data[length].venue.long,
-            },
-            dateTime: data[length].dateTime,
-            desc: data[length].desc,
-            presenter: data[length].presenter,
-            price: data[length].price,
-          });
-        }
-        res.setHeader("Content-Type", "text/plain");
-        res.status(200).send(JSON.stringify(output, null, 2));
-      })
-      .catch((err) => {
-        res.setHeader("Content-Type", "text/plain");
-        res.status(500).send("Internal Server Error");
-      });
-  }
+  res.setHeader("Content-Type", "application/json");
+  Event.find({})
+    .then((data) => {
+      const output = [];
+      for (length in data) {
+        output.push({
+          eventId: data[length].eventId,
+          title: data[length].title,
+          venueId: data[length].venue.venueId,
+          dateTime: data[length].dateTime,
+          desc: data[length].desc,
+          presenter: data[length].presenter,
+          price: data[length].price,
+        });
+      }
+      res.status(200).send(output);
+    })
+    .catch((err) => {
+      res.setHeader("Content-Type", "text/plain");
+      console.log(err);
+      res.status(500).send("Internal Server Error");
+    });
 });
 
 //Create Event data
