@@ -71,9 +71,7 @@ export const SignUp = () => {
       const postResult = await axios.post("http://localhost:8000/register", { formData });
       console.log("postResult>>", postResult);
       if (postResult.status === 200) {
-        // return navigate("/venue");
         setUserData(postResult.data);
-        // console.log("userdata>>", userdata)
         return setFormSubmit(true);
       }
     } catch (error) {
