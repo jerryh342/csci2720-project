@@ -1,9 +1,9 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import axios from "axios";
-import { Table, Button, Input, Collapse } from "antd";
+import {Table, Button, Input, Collapse} from "antd";
 import NavBar from "./navbar";
-import { withRouter } from "react-router-dom";
-import { SignUp } from "./signup";
+import {withRouter} from "react-router-dom";
+import {SignUp} from "./signup";
 class User extends Component {
   constructor(props) {
     super(props);
@@ -36,13 +36,13 @@ class User extends Component {
   editUser = (e) => {
     this.setState({
       editingKey: e.id,
-      editingValues: { username: e.name, password: e.pw },
+      editingValues: {username: e.name, password: e.pw},
     });
   };
 
   // Update a user
   updateUser = (key) => {
-    const { editingValues } = this.state;
+    const {editingValues} = this.state;
 
     key = key.id;
     axios({
@@ -81,7 +81,7 @@ class User extends Component {
   };
 
   render() {
-    const { editingKey, editingValues } = this.state;
+    const {editingKey, editingValues} = this.state;
     let role;
     try {
       role = JSON.parse(sessionStorage.getItem("role"))?.value;
@@ -98,32 +98,14 @@ class User extends Component {
         dataIndex: "name",
         key: "name",
         width: 100,
-        render: (text, record) =>
-          editingKey === record.id ? (
-            <Input
-              value={editingValues.username}
-              onChange={(e) => this.setState({ editingValues: { ...editingValues, username: e.target.value } })}
-              style={{ width: 200 }}
-            />
-          ) : (
-            text
-          ),
+        render: (text, record) => (editingKey === record.id ? <Input value={editingValues.username} onChange={(e) => this.setState({editingValues: {...editingValues, username: e.target.value}})} style={{width: 200}} /> : text),
       },
       {
         title: "Hashed Password",
         dataIndex: "pw",
         key: "pw",
         width: 600,
-        render: (text, record) =>
-          editingKey === record.id ? (
-            <Input
-              value={editingValues.password}
-              onChange={(e) => this.setState({ editingValues: { ...editingValues, password: e.target.value } })}
-              style={{ width: 600 }}
-            />
-          ) : (
-            text
-          ),
+        render: (text, record) => (editingKey === record.id ? <Input value={editingValues.password} onChange={(e) => this.setState({editingValues: {...editingValues, password: e.target.value}})} style={{width: 600}} /> : text),
       },
       {
         title: "Operations",
@@ -132,15 +114,11 @@ class User extends Component {
         render: (text, record) => (
           <div>
             {editingKey === record.id ? (
-              <Button
-                style={{ marginRight: "10px", backgroundColor: "green" }}
-                type="primary"
-                onClick={() => this.updateUser(record)}
-              >
+              <Button style={{marginRight: "10px", backgroundColor: "green"}} type="primary" onClick={() => this.updateUser(record)}>
                 Update User
               </Button>
             ) : (
-              <Button style={{ marginRight: "10px" }} type="primary" onClick={() => this.editUser(record)}>
+              <Button style={{marginRight: "10px"}} type="primary" onClick={() => this.editUser(record)}>
                 Edit User
               </Button>
             )}
@@ -156,7 +134,7 @@ class User extends Component {
       <main>
         <div>
           {<NavBar />}
-          <h1 style={{ textAlign: "left" }}>Manage Users</h1>
+          <h1 style={{textAlign: "left"}}>Manage Users</h1>
           {/*<Collapse
             size="large"
             items={[
@@ -167,7 +145,7 @@ class User extends Component {
               },
             ]}
           ></Collapse>*/}
-          <Button style={{ float: "left", marginLeft: "7px", marginBottom: "10px" }} type="primary" href="/register">
+          <Button style={{float: "left", marginLeft: "7px", marginBottom: "10px"}} type="primary" href="/register">
             Create User
           </Button>
         </div>
