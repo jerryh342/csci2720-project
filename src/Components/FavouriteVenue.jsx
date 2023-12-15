@@ -32,7 +32,6 @@ class FavouriteLocations extends Component {
   LoadLocationList() {
     this.setState({ isLoadingData: true });
     axios({
-      // need change localhost to the publicIP
       url: "http://localhost:8000/venue",
       method: "GET",
       withCredentials: true,
