@@ -50,8 +50,6 @@ class FavouriteLocations extends Component {
 
     this.handleFilter = this.handleFilter.bind(this);
   }
-
-  // load all locations in a table
   LoadLocationList() {
     this.setState({ isLoadingData: true });
     axios({
