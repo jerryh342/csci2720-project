@@ -3,7 +3,7 @@ import axios from "axios";
 import { Table, Button, Input, Form, Modal, Select, DatePicker, TimePicker } from "antd";
 import { useForm } from "antd/lib/form/Form";
 import NavBar from "./navbar";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined} from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import SuccessPage from "./Success";
 
@@ -578,12 +578,12 @@ function Event() {
       render: (text, record) => (
         <div>
           {
-            <Button style={{ marginBottom: "10px" }} type="primary" onClick={() => editEvent(record)}>
-              Edit Event
+            <Button style={{ marginBottom: "10px" }} type="primary" onClick={() => editEvent(record)} icon={<EditOutlined />}>
+              {/* Edit Event */}
             </Button>
           }
-          <Button type="primary" danger onClick={() => deleteEvent(record.eventId)}>
-            Delete Event
+          <Button type="primary" danger onClick={() => deleteEvent(record.eventId)} icon={<DeleteOutlined />}>
+            {/* Delete Event */}
           </Button>
         </div>
       ),
