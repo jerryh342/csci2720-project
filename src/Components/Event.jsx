@@ -571,6 +571,7 @@ function Event() {
       dataIndex: "title",
       key: "title",
       render: (text, record) => text,
+      width: 800
     },
     {
       title: "Operations",
