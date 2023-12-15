@@ -55,7 +55,6 @@ class Locations extends Component {
     this.searchLocation = this.searchLocation.bind(this);
   }
 
-  //invoked for each set state(only called once => new class + new componentdidmount)
   componentDidMount() {
     this.LoadLocationList();
     this.loadUserFavLoc();
