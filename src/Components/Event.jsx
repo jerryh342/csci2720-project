@@ -274,6 +274,10 @@ function CreateEventForm() {
   };
 
   useEffect(() => {
+    form.setFieldsValue(initialValues)
+   }, [form, initialValues])
+
+  useEffect(() => {
     const fetchVenues = () => {
       const venues = axios({
         url: "http://localhost:8000/venue",
