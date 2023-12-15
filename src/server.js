@@ -245,6 +245,17 @@ app.post("/addFavbyUser", async (req, res) => {
   }
 });
 
+app.get("/ev/:eventId", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  Event.findOne({ eventId: req.params.id })
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404).send("No such event");
+    });
+});
+
 // get users data
 app.get("/admin/user", (req, res) => {
   LoginModel.find()
