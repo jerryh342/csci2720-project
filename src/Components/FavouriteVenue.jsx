@@ -35,6 +35,7 @@ class FavouriteLocations extends Component {
       // need change localhost to the publicIP
       url: "http://localhost:8000/venue",
       method: "GET",
+      withCredentials: true,
     })
       .then((r) => {
         const filteredData = r.data.filter((v) => v.eventCount > 3);
