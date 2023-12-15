@@ -7,6 +7,196 @@ import { PlusOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import SuccessPage from "./Success";
 
+function EditEventForm({ event, venues }) {
+  const [locationArr, setLocationArr] = useState([]);
+  const [fullLoc, setFullLoc] = useState([]);
+  const [showErr, setShowErr] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [formData, setFormData] = useState({
+    eventId: "",
+    title: "",
+    venue: "",
+    date: "",
+    desc: "",
+    presenter: "",
+    price: "",
+  });
+  const { Option } = Select;
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    const venue = venues.filter((item) => item.locid == event.venue)[0];
+    console.log(venue);
+    form.setFieldsValue({ ...event, venue: venue.name });
+  }, [form, event]);
+
+  const handleSubmit = (fieldValues) => {
+    const parsedValue = parseInt(fieldValues.eventId);
+    if (isNaN(parsedValue)) {
+      return setShowErr(true);
+    }
+    const [loc] = fullLoc.filter((item) => item.name == fieldValues.venue);
+    const eventDetails = {
+      title: fieldValues.title,
+      venue: parseInt(loc.locid),
+      dateTime: fieldValues.dateTime,
+      desc: fieldValues.desc,
+      presenter: fieldValues.presenter,
+      price: fieldValues.price,
+    };
+    setFormData(eventDetails);
+    axios({
+      url: "http://localhost:8000/admin/event/update/" + parsedValue,
+      method: "PUT",
+      data: eventDetails,
+    })
+      .then((res) => {
+        console.log("res", res);
+        setFormData({ eventId: parsedValue });
+        form.resetFields();
+        setSuccess(true);
+      })
+      .catch((err) => {
+        console.log("err>>", err);
+      });
+  };
+
+  useEffect(() => {
+    const fetchVenues = () => {
+      const venues = axios({
+        url: "http://localhost:8000/venue",
+        method: "GET",
+      })
+        .then((location) => {
+          setFullLoc(location.data);
+          const venuenames = location?.data.map((item) => {
+            return { name: item.name, venueId: item.locid };
+          });
+          //console.log("location.data>>", venuenames);
+          setLocationArr(venuenames);
+          console.log("fetched venues");
+        })
+        .catch((err) => console.log("err>>", err));
+    };
+    fetchVenues();
+  }, [success]);
+
+  return (
+    <>
+      {success && (
+        <SuccessPage
+          status={"success"}
+          showButton={false}
+          title={`Successfully updated event id: ${formData.eventId}`}
+        />
+      )}
+      {!success && (
+        <Form
+          form={form}
+          name="basic"
+          labelCol={{
+            span: 6,
+          }}
+          wrapperCol={{
+            span: 18,
+          }}
+          style={{
+            width: "100%",
+            alignContent: "center",
+          }}
+          initialValues={event}
+          autoComplete="off"
+          onFinish={handleSubmit}
+        >
+          <Form.Item name="eventId" label="Event ID">
+            <Input readOnly />
+          </Form.Item>
+          <Form.Item
+            name="title"
+            label="Title"
+            rules={[{ required: true }]}
+            labelCol={{
+              span: 6,
+            }}
+            wrapperCol={{
+              span: 18,
+            }}
+          >
+            <Input placeholder="Title" name="title" />
+          </Form.Item>
+          <Form.Item
+            name="venue"
+            label="Venue"
+            rules={[{ required: true }]}
+            labelCol={{
+              span: 6,
+            }}
+            wrapperCol={{
+              span: 18,
+            }}
+          >
+            <Select name="venue">
+              {locationArr.map((option) => (
+                <Option key={option.venueId} value={option.name}>
+                  {option.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item name="dateTime" label="Date" rules={[{ required: true, message: "Please input the date" }]}>
+            <TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
+          </Form.Item>
+          <Form.Item
+            name="desc"
+            label="Description"
+            rules={[{ required: true }]}
+            labelCol={{
+              span: 6,
+            }}
+            wrapperCol={{
+              span: 18,
+            }}
+          >
+            <TextArea name="desc" placeholder="Event Description" autoSize={{ minRows: 2, maxRows: 4 }} />
+          </Form.Item>
+          <Form.Item
+            name="presenter"
+            label="Presenter"
+            rules={[{ required: true }]}
+            labelCol={{
+              span: 6,
+            }}
+            wrapperCol={{
+              span: 18,
+            }}
+          >
+            <Input name="presenter" placeholder="Presenter" />
+          </Form.Item>
+          <Form.Item
+            name="price"
+            label="Price"
+            rules={[{ required: true }]}
+            labelCol={{
+              span: 6,
+            }}
+            wrapperCol={{
+              span: 18,
+            }}
+          >
+            <Input name="price" placeholder="Price" />
+          </Form.Item>
+
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </div>
+        </Form>
+      )}
+    </>
+  );
+}
+
 function CreateEventForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [locationArr, setLocationArr] = useState([]);
@@ -92,7 +282,7 @@ function CreateEventForm() {
         .then((location) => {
           setFullLoc(location.data);
           const venuenames = location?.data.map((item) => item.name);
-          console.log("location.data>>", venuenames);
+          //console.log("location.data>>", venuenames);
           setLocationArr(venuenames);
         })
         .catch((err) => console.log("err>>", err));
@@ -104,7 +294,7 @@ function CreateEventForm() {
       })
         .then((events) => {
           const eventIds = events?.data.map((item) => item.eventId);
-          console.log("seteventIds>>", eventIds);
+          //console.log("seteventIds>>", eventIds);
           const generateRandomNumber = () => {
             const upperLimit = 1000000;
             let randomNum = Math.floor(Math.random() * upperLimit) + 1;
@@ -126,7 +316,15 @@ function CreateEventForm() {
   return (
     <>
       <Button shape="circle" type="primary" icon={<PlusOutlined />} onClick={showModal} />
-      <Modal title="Add Event" open={isModalOpen} onOk={handleOk} onCancel={handleCancel} height={400} width={1000}>
+      <Modal
+        footer={null}
+        title="Add Event"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        height={400}
+        width={1000}
+      >
         {success && (
           <SuccessPage
             status={"success"}
@@ -266,6 +464,187 @@ function CreateEventForm() {
   );
 }
 
+function Event() {
+  const [eventList, setEventList] = useState([]);
+  const [fullLoc, setFullLoc] = useState([]);
+  const [editingKey, setEditingKey] = useState("");
+  const [editingValues, setEditingValues] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [allowInput, setAllowInput] = useState(false);
+  const [isButtonEnabled, setIsButtonEnabled] = useState(true);
+  const [form] = Form.useForm();
+  useEffect(() => {
+    setIsLoading(true);
+    const fetchVenues = () => {
+      const venues = axios({
+        url: "http://localhost:8000/venue",
+        method: "GET",
+      })
+        .then((location) => {
+          setFullLoc(location?.data);
+          setIsLoading(false);
+          console.log("fetched venues");
+        })
+        .catch((err) => console.log("err>>", err));
+    };
+    fetchVenues();
+    loadEventList();
+  }, []);
+
+  useEffect(() => {
+    form.setFieldsValue({ ...editingValues, eventId: editingKey });
+  }, [form, editingKey]);
+
+  const loadEventList = () => {
+    axios({
+      url: "http://localhost:8000/admin/event",
+      method: "GET",
+    })
+      .then((r) => {
+        setEventList(r.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const editEvent = (e) => {
+    setEditingValues({
+      eventId: e.eventId,
+      title: e.title,
+      venue: e.venue,
+      dateTime: e.dateTime,
+      desc: e.desc,
+      presenter: e.presenter,
+      price: e.price,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    form.submit();
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setIsDelModalOpen(false);
+  };
+  /*
+  const updateEvent = (key) => {
+    axios({
+      url: "http://localhost:8000/admin/event/update/${key}",
+      method: "PUT",
+      data: editingValues,
+    })
+      .then((r) => {
+        console.log(r.data);
+        loadEventList();
+        setEditingKey("");
+        setEditingValues({});
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    console.log(key);
+  };
+  */
+
+  const deleteEvent = (e) => {
+    console.log(e);
+    axios({
+      url: `http://localhost:8000/admin/event/delete/${e}`,
+      method: "DELETE",
+    })
+      .then((e) => {
+        loadEventList();
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const columns = [
+    {
+      title: "Event Name",
+      dataIndex: "title",
+      key: "title",
+      render: (text, record) => text,
+    },
+    {
+      title: "Operations",
+      key: "operations",
+      render: (text, record) => (
+        <div>
+          {
+            <Button style={{ marginBottom: "10px" }} type="primary" onClick={() => editEvent(record)}>
+              Edit Event
+            </Button>
+          }
+          <Button type="primary" danger onClick={() => deleteEvent(record.eventId)}>
+            Delete Event
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <main>
+      <div>
+        {<NavBar />}
+        <h1 style={{ textAlign: "left" }}>Manage Events</h1>
+      </div>
+      <CreateEventForm />
+      {<div style={{ clear: "both" }}></div>}
+      <div>
+        <Table loading={isLoading} columns={columns} dataSource={eventList} rowKey="eventId" />
+      </div>
+      <div>
+        <Modal footer={null} title="Edit Event" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+          <EditEventForm key={1} event={editingValues} venues={fullLoc} />
+        </Modal>
+        {
+          <Modal title="Delete Event" open={isDelModalOpen} onOk={handleCancel} onCancel={handleCancel}>
+            Successfully deleted!
+          </Modal>
+        }
+        {/*<Form form={form} initialValues={{ ...editingValues, eventId: editingKey }} onFinish={updateEvent}>
+            <Form.Item name="eventId" label="Event ID">
+              <Input readOnly />
+            </Form.Item>
+            <Form.Item name="title" label="Title" rules={[{ required: true, message: "Please input the title" }]}>
+              <TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
+            </Form.Item>
+            <Form.Item name="venue" label="Venue" rules={[{ required: true, message: "Please input the venue" }]}>
+              <TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
+            </Form.Item>
+            <Form.Item name="dateTime" label="Date" rules={[{ required: true, message: "Please input the date" }]}>
+              <TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
+            </Form.Item>
+            <Form.Item
+              name="desc"
+              label="Description"
+              rules={[{ required: true, message: "Please input the description" }]}
+            >
+              <TextArea autoSize={{ minRows: 3, maxRows: 10 }} />
+            </Form.Item>
+            <Form.Item
+              name="presenter"
+              label="Presenter"
+              rules={[{ required: true, message: "Please input the presenter" }]}
+            >
+              <TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
+            </Form.Item>
+            <Form.Item name="price" label="Price" rules={[{ required: true, message: "Please input the price" }]}>
+              <TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
+            </Form.Item>
+  </Form>*/}
+      </div>
+    </main>
+  );
+}
+export default Event;
+
+//:(
+/*
 class Event extends Component {
   constructor(props) {
     super(props);
@@ -284,6 +663,10 @@ class Event extends Component {
 
   componentDidMount() {
     this.loadEventList();
+  }
+
+  componentDidUpdate(){
+
   }
 
   loadEventList() {
@@ -336,6 +719,7 @@ class Event extends Component {
         },
       },
       () => {
+        this.formRef.current?.setFieldsValue();
         console.log(this.state.editingKey);
         console.log(this.state.editingValues);
         this.setState({ isModalOpen: true });
@@ -484,6 +868,7 @@ class Event extends Component {
                 Update Event
               </Button>
             ) : (*/
+/*
               <Button style={{ marginBottom: "10px" }} type="primary" onClick={() => this.editEvent(record)}>
                 Edit Event
               </Button>
@@ -595,5 +980,4 @@ class Event extends Component {
       </main>
     );
   }
-}
-export default Event;
+}*/
