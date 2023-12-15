@@ -2,9 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { HomeOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
-import { Breadcrumb, Layout, Menu, theme, Row, Col } from "antd";
+import { Menu, theme, Row, Col } from "antd";
 import { FaHeart } from "react-icons/fa6";
-const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
 
 const NavBar = (props) => {
@@ -55,7 +54,6 @@ const NavBar = (props) => {
     );
   } else {
     return (
-      
       <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "end" }} >
         <Row justify="end" gutter={32}>
         <Col>
@@ -86,16 +84,27 @@ const NavBar = (props) => {
           <SubMenu key="SubMenu" icon={<UserOutlined />} title={user.username}>
             <Menu.Item key="setting:1" onClick={logOut}>
               Logout
+
+                </Menu.Item>
+                {user.role == "admin" ? (
+                  <Menu.Item key="setting:2" onClick={() => navigate("/admin/user")}>
+                    Manage Users
+                  </Menu.Item>
+                ) : (
+                  <></>
+                )}
+                {user.role == "admin" ? (
+                  <Menu.Item key="setting:2" onClick={() => navigate("/admin/event")}>
+                    Manage Events
+                  </Menu.Item>
+                ) : (
+                  <></>
+                )}
+              </SubMenu>
             </Menu.Item>
-            <Menu.Item key="setting:2" onClick={() => navigate("/register")}>
-              Add new users (maybe add to Jeffrey's Page)
-            </Menu.Item>
-          </SubMenu>
-        </Menu.Item>
-        </Col>
+          </Col>
         </Row>
       </Menu>
-      
     );
   }
 };

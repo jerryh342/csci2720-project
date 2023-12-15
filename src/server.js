@@ -730,7 +730,7 @@ app.get("/invites", (req, res) => {
 app.delete("/admin/event/delete/:eventId", (req, res) => {
   Event.findOneAndDelete({ eventId: req.params["eventId"] })
     .then((data) => {
-      if (data.deletedCount === 1) {
+      if (data) {
         res.sendStatus(204);
       } else {
         res.setHeader("Content-Type", "text/plain");
@@ -739,6 +739,7 @@ app.delete("/admin/event/delete/:eventId", (req, res) => {
       }
     })
     .catch((error) => {
+      console.log(error);
       res.setHeader("Content-Type", "text/plain");
       res.status(500).send("Internal Server Error");
     });
@@ -751,7 +752,7 @@ app.put("/admin/event/update/:eventId", (req, res) => {
   if (
     !updatedData.title ||
     !updatedData.venue ||
-    !updatedData.dataTime ||
+    !updatedData.dateTime ||
     !updatedData.desc ||
     !updatedData.presenter ||
     !updatedData.price
@@ -779,12 +780,13 @@ app.put("/admin/event/update/:eventId", (req, res) => {
 
 app.post("/admin/event/create", async (req, res) => {
   try {
-    const { formData: values } = req.body;
+    console.log("req.body>>", req.body)
+    const values = req.body;
     console.log("values>>", values);
-    const eventid = values.eventId ? values.eventId : "";
+    const eventid = values.eventId ? parseInt(values.eventId) : "";
     const title = values.title ? values.title : "";
-    const venue = values.loc ? values.loc : "";
-    const dateTime = values.date ? values.date : "";
+    const venue = values.venue ? values.venue : "";
+    const dateTime = values.dateTime ? values.dateTime : "";
     const description = values.desc ? values.desc : "";
     const presenter = values.presenter ? values.presenter : "";
     const price = values.price ? values.price : "";
@@ -803,17 +805,17 @@ app.post("/admin/event/create", async (req, res) => {
     Event.create({
       eventId: eventid,
       title: title,
-      loc: venue,
-      date: dateTime,
+      venue: venue,
+      dateTime: dateTime,
       desc: description,
       presenter: presenter,
       price: price,
     })
-      .then((event) => res.json(event))
-      .catch((err) => res.json(err));
+      .then((event) => res.status(201).send(event))
+      .catch((err) => res.status(404).send(err));
   } catch (error) {
     console.log("error>>", error);
-    res.json(error);
+    res.status(404).send(err)
   }
 });
 
@@ -825,8 +827,8 @@ app.get("/admin/event", (req, res) => {
         return {
           eventId: item.eventId,
           title: item.title,
-          loc: item.venue,
-          date: item.dateTime,
+          venue: item.venue,
+          dateTime: item.dateTime,
           desc: item.desc,
           presenter: item.presenter,
           price: item.price,
