@@ -71,7 +71,6 @@ class User extends Component {
     };
 
     axios({
-      // need change localhost to the publicIP
       url: `http://localhost:8000/deleteuser/${e}`,
       method: "DELETE",
     })
@@ -98,6 +97,7 @@ class User extends Component {
         title: "Username",
         dataIndex: "name",
         key: "name",
+        width: 100,
         render: (text, record) =>
           editingKey === record.id ? (
             <Input
@@ -113,6 +113,7 @@ class User extends Component {
         title: "Hashed Password",
         dataIndex: "pw",
         key: "pw",
+        width: 600,
         render: (text, record) =>
           editingKey === record.id ? (
             <Input
@@ -127,6 +128,7 @@ class User extends Component {
       {
         title: "Operations",
         key: "operations",
+        width: 100,
         render: (text, record) => (
           <div>
             {editingKey === record.id ? (

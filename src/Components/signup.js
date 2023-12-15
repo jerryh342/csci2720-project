@@ -57,13 +57,13 @@ export const SignUp = () => {
   const handleSubmit = async (values) => {
     console.log("submit");
     console.log("values>>", formData);
-    if (formData.password !== formData.confirmPassword) setError(setShowErr, true);
+    if (formData.password !== formData.confirmPassword) return setError(setShowErr, true);
     else setError(setShowErr, false);
-    if (!passwordRegex.test(formData.password)) setError(setWrongPw, true);
+    if (!passwordRegex.test(formData.password)) return setError(setWrongPw, true);
     else setError(setWrongPw, false);
     if (usernames.includes(formData.username)) return setError(setUserNameUsed, true);
     else setError(setUserNameUsed, false);
-
+    console.log("cp877", !passwordRegex.test(formData.password))
     if (showErr || userNameUsed || wrongPw) return;
 
     console.log("Success:", values);
