@@ -1,3 +1,37 @@
+/*
+I am submitting the assignment for: 
+a group project on behalf of all members of the group. 
+It is hereby confirmed that the submission is authorized by all members of the group, and all members of the group are required to sign this declaration. 
+We declare that: 
+(i) the assignment here submitted is original except for source material explicitly acknowledged/all members of the group have read and checked that all parts of the piece of work, 
+irrespective of whether they are contributed by individual members or all members as a group, here submitted are original except for source material explicitly acknowledged; 
+(ii) the piece of work, or a part of the piece of work has not been submitted for more than one purpose (e.g. to satisfy the requirements in two different courses) without declaration; and (iii) the submitted soft copy with details listed in the <Submission Details> is identical to the hard copy(ies), 
+if any, which has(have) been / is(are) going to be submitted.  
+We also acknowledge that I am/we are aware of the University’s policy and regulations on honesty in academic work, and of the disciplinary guidelines and procedures applicable to breaches of such policy and regulations, as contained in the University website http://www.cuhk.edu.hk/policy/academichonesty/. 
+In the case of a group project, we are aware that all members of the group should be held responsible and liable to disciplinary actions, irrespective of whether he/she has signed the declaration and whether he/she has contributed, directly or indirectly, to the problematic contents.
+We declare that we have not distributed/ shared/ copied any teaching materials without the consent of the course teacher(s) to gain unfair academic advantage in the assignment/ course.
+We declare that we have read and understood the University’s policy on the use of AI for academic work.  we confirm that we have complied with the instructions given by my/our course teacher(s) regarding the use of AI tools for this assignment and consent to the use of AI content detection software to review my/our submission.
+We also understand that assignments without a properly signed declaration by the student concerned and in the case of a group project, by all members of the group concerned, will not be graded by the teacher(s).
+
+Signature(s):					        
+HuenLongYin CheungHouLong LeungKaiKit ChanHonKi KwokLongChing 
+
+Date:
+15 December 2023
+
+Name(s):							
+Huen Long Yin Chan Hon Ki Cheung Hou Long Leung Kai Kit  Kwok Long Ching
+
+Student ID(s):
+1155159568 1155158959 1155149115 1155143874  1155156653
+
+Course code:						
+CSCI2720
+
+Course title:
+Building Web Applications
+
+*/
 const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
@@ -18,7 +52,7 @@ const fetchXML = require("./fetchXML.js");
 
 const app = express();
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: "http://localhost:3000", // <-- location of the react app were connecting to
@@ -69,8 +103,17 @@ db.once("open", function () {
           if (err) throw err;
           const result = await fetchXML.getXML();
           const currentTime = new Date();
-          const timestamp = currentTime.getFullYear() + "/" + (currentTime.getMonth() + 1) + "/" + currentTime.getDate() + " " + currentTime.getHours() + ":" + currentTime.getMinutes();
-          res.status(200).send({user: req.user, timestamp: timestamp});
+          const timestamp =
+            currentTime.getFullYear() +
+            "/" +
+            (currentTime.getMonth() + 1) +
+            "/" +
+            currentTime.getDate() +
+            " " +
+            currentTime.getHours() +
+            ":" +
+            currentTime.getMinutes();
+          res.status(200).send({ user: req.user, timestamp: timestamp });
           console.log(req.user);
         });
       }
@@ -88,7 +131,7 @@ db.once("open", function () {
     if (!user) {
       return req.status(500).send("User missing");
     }
-    LoginModel.findOne({username: user})
+    LoginModel.findOne({ username: user })
       .then((user) => {
         if (user) {
           const favValueArr = user.fav;
@@ -117,7 +160,7 @@ db.once("open", function () {
 
   app.post("/register", async (req, res) => {
     try {
-      const {formData: values} = req.body;
+      const { formData: values } = req.body;
       console.log("values>>", values);
       const username = values.username ? values.username : "";
       const email = "test@cuhk.edu.hk";
@@ -205,7 +248,7 @@ app.post("/addFavbyUser", async (req, res) => {
   }
 
   try {
-    const loginDoc = await LoginModel.findOne({username: user});
+    const loginDoc = await LoginModel.findOne({ username: user });
 
     if (!loginDoc) {
       return res.status(404).send("User not found");
@@ -215,11 +258,19 @@ app.post("/addFavbyUser", async (req, res) => {
 
     if (favArray.includes(parseInt(favlocid))) {
       // Remove favlocid from fav array
-      const updatedDoc = await LoginModel.findOneAndUpdate({username: user}, {$pull: {fav: parseInt(favlocid)}}, {new: true});
+      const updatedDoc = await LoginModel.findOneAndUpdate(
+        { username: user },
+        { $pull: { fav: parseInt(favlocid) } },
+        { new: true }
+      );
       res.status(201).send(updatedDoc);
     } else {
       // Add favlocid to fav array
-      const updatedDoc = await LoginModel.findOneAndUpdate({username: user}, {$addToSet: {fav: parseInt(favlocid)}}, {new: true});
+      const updatedDoc = await LoginModel.findOneAndUpdate(
+        { username: user },
+        { $addToSet: { fav: parseInt(favlocid) } },
+        { new: true }
+      );
       res.status(201).send(updatedDoc);
     }
   } catch (err) {
@@ -230,7 +281,7 @@ app.post("/addFavbyUser", async (req, res) => {
 
 app.get("/ev/:eventId", (req, res) => {
   res.setHeader("Content-Type", "application/json");
-  Event.findOne({eventId: req.params.id})
+  Event.findOne({ eventId: req.params.id })
     .then((data) => {
       res.status(200).send(data);
     })
@@ -244,7 +295,7 @@ app.get("/admin/user", (req, res) => {
   LoginModel.find()
     .then((data) => {
       let users = data.map((item, idx) => {
-        return {id: item._id, name: item.username, email: item.email, pw: item.password, fav: item.fav};
+        return { id: item._id, name: item.username, email: item.email, pw: item.password, fav: item.fav };
       });
       res.status(200);
       res.send(users);
@@ -258,7 +309,7 @@ app.get("/admin/user", (req, res) => {
 
 // Delete User data
 app.delete("/deleteuser/:username", (req, res) => {
-  LoginModel.findOneAndDelete({username: req.params["username"]})
+  LoginModel.findOneAndDelete({ username: req.params["username"] })
     .then((data) => {
       if (data) {
         res.sendStatus(204);
@@ -287,7 +338,7 @@ app.put("/updateuser/:id", async (req, res) => {
   const hashedPw = await bcrypt.hash(updatedData.password, 10);
   updatedData.password = hashedPw;
 
-  LoginModel.findOneAndUpdate({_id: req.params.id}, updatedData, {new: true})
+  LoginModel.findOneAndUpdate({ _id: req.params.id }, updatedData, { new: true })
     .then((data) => {
       if (data) {
         res.json(data);
@@ -314,13 +365,13 @@ app.post("/venue/fav", (req, res) => {
   const usrname = req.body.user;
   const venue = req.body.locid;
 
-  LoginModel.findOne({username: usrname})
+  LoginModel.findOne({ username: usrname })
     .then((userData) => {
       const userId = userData._id;
-      Venue.findOne({venueId: venue})
+      Venue.findOne({ venueId: venue })
         .then((venueData) => {
           const venueId = venueData._id;
-          FavVenue.findOne({user: userId, venue: venueId})
+          FavVenue.findOne({ user: userId, venue: venueId })
             .then((favVenueData) => {
               if (favVenueData) {
                 // Favorite venue already exists for the user
@@ -359,19 +410,19 @@ app.get("/venue/fav/:user", async (req, res) => {
   try {
     const username = req.params.user;
     // console.log(username);
-    const userData = await LoginModel.findOne({username});
+    const userData = await LoginModel.findOne({ username });
     if (!userData) {
       return res.status(404).send("No Favourite");
     }
 
     const userId = userData._id;
-    const data = await FavVenue.find({user: userId});
+    const data = await FavVenue.find({ user: userId });
     const favVenues = [];
 
     for (const item of data) {
       // console.log(item.venue);
       const venueData = await Venue.findById(item.venue);
-      const count = await Event.countDocuments({venue: venueData.venueId});
+      const count = await Event.countDocuments({ venue: venueData.venueId });
       favVenues.push({
         name: venueData.venueName,
         lat: venueData.lat,
@@ -391,13 +442,13 @@ app.delete("/venue/fav", (req, res) => {
   const usrname = req.body.user;
   const venue = req.body.locid;
 
-  LoginModel.findOne({username: usrname})
+  LoginModel.findOne({ username: usrname })
     .then((userData) => {
       const userId = userData._id;
-      Venue.findOne({venueId: venue})
+      Venue.findOne({ venueId: venue })
         .then((venueData) => {
           const venueId = venueData._id;
-          FavVenue.findOneAndDelete({user: userId, venue: venueId})
+          FavVenue.findOneAndDelete({ user: userId, venue: venueId })
             .then((favVenueData) => {
               if (!favVenueData) {
                 // Favorite venue does not exist for the user
@@ -422,7 +473,7 @@ app.delete("/venue/fav", (req, res) => {
 app.get("/venue/:venueId/ev", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   console.log(req.params.venueId);
-  Event.find({venue: req.params.venueId})
+  Event.find({ venue: req.params.venueId })
     .then((data) => {
       console.log(data);
       res.status(200).send(data);
@@ -439,7 +490,7 @@ app.get("/venue", async (req, res) => {
     const venues = [];
 
     for (const item of data) {
-      const count = await Event.countDocuments({venue: item.venueId});
+      const count = await Event.countDocuments({ venue: item.venueId });
       venues.push({
         name: item.venueName,
         lat: item.lat,
@@ -459,7 +510,7 @@ app.get("/venue", async (req, res) => {
 //get venue details
 app.get("/venue/:venueId", (req, res) => {
   res.setHeader("Content-Type", "application/json");
-  Venue.findOne({venueId: req.params.venueId})
+  Venue.findOne({ venueId: req.params.venueId })
     .then((data) => {
       let venue = {
         venueId: data.venueId,
@@ -480,7 +531,7 @@ app.get("/venue", (req, res) => {
   Venue.find()
     .then((data) => {
       let venues = data.map((item, idx) => {
-        return {name: item.venueName, lat: item.lat, long: item.long, locid: item.venueId};
+        return { name: item.venueName, lat: item.lat, long: item.long, locid: item.venueId };
       });
       res.status(200);
       res.send(venues);
@@ -494,11 +545,11 @@ app.get("/venue", (req, res) => {
 
 // get comments
 app.get("/comments/:venueId", (req, res) => {
-  Comment.find({venueId: req.params.venueId})
+  Comment.find({ venueId: req.params.venueId })
     .populate("user")
     .then((data) => {
       let comments = data.map((item, idx) => {
-        return {user: item.user.username, venueId: item.venueId, content: item.content};
+        return { user: item.user.username, venueId: item.venueId, content: item.content };
       });
       res.status(200);
       res.send(comments);
@@ -514,7 +565,7 @@ app.get("/comments/:venueId", (req, res) => {
 app.post("/newcomment", (req, res) => {
   res.setHeader("Content-Type", "text/plain");
   const usrname = req.body.user;
-  LoginModel.findOne({username: usrname})
+  LoginModel.findOne({ username: usrname })
     .then((data) => {
       const userId = data._id;
       Comment.create({
@@ -538,7 +589,7 @@ app.post("/newcomment", (req, res) => {
 //update invite
 app.put("/invites/update/:eventId", async (req, res) => {
   try {
-    const user = await LoginModel.findOne({username: req.body.username});
+    const user = await LoginModel.findOne({ username: req.body.username });
     let msg;
     const invite = await Invite.findOne({
       eventId: req.params.eventId,
@@ -548,8 +599,8 @@ app.put("/invites/update/:eventId", async (req, res) => {
       //delete action
       if (req.body.delete) {
         try {
-          invite.users.pull({_id: user._id});
-          user.invitations.pull({_id: invite._id});
+          invite.users.pull({ _id: user._id });
+          user.invitations.pull({ _id: invite._id });
         } catch (err) {
           console.log(err);
         }
@@ -595,11 +646,11 @@ app.put("/invites/update/:eventId", async (req, res) => {
 //create new invite
 app.put("/invites/create/:eventId", async (req, res) => {
   try {
-    const user = await LoginModel.findOne({username: req.body.username});
-    const invite = await Invite.findOne({eventId: req.params.eventId});
+    const user = await LoginModel.findOne({ username: req.body.username });
+    const invite = await Invite.findOne({ eventId: req.params.eventId });
     if (!invite) {
       const userArray = [];
-      const event = await Event.findOne({eventId: req.params.eventId});
+      const event = await Event.findOne({ eventId: req.params.eventId });
       userArray.push(user._id);
       console.log(userArray);
       const newInvite = new Invite({
@@ -635,9 +686,9 @@ app.put("/invites/create/:eventId", async (req, res) => {
 app.post("/invites/user", async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   if (req.body.username) {
-    const user = await LoginModel.findOne({username: req.body.username});
+    const user = await LoginModel.findOne({ username: req.body.username });
     try {
-      Invite.find({users: user._id})
+      Invite.find({ users: user._id })
         .populate([
           {
             path: "users",
@@ -663,7 +714,7 @@ app.post("/invites/user", async (req, res) => {
 //Get event invite for 1 event
 app.get("/invites/:eventId", async (req, res) => {
   res.setHeader("Content-Type", "application/json");
-  Invite.findOne({eventId: req.params.eventId})
+  Invite.findOne({ eventId: req.params.eventId })
     .populate([
       {
         path: "users",
@@ -730,7 +781,7 @@ app.get("/invites", (req, res) => {
 
 // Delete User data
 app.delete("/admin/event/delete/:eventId", (req, res) => {
-  Event.findOneAndDelete({eventId: req.params["eventId"]})
+  Event.findOneAndDelete({ eventId: req.params["eventId"] })
     .then((data) => {
       if (data) {
         res.sendStatus(204);
@@ -751,13 +802,20 @@ app.delete("/admin/event/delete/:eventId", (req, res) => {
 app.put("/admin/event/update/:eventId", (req, res) => {
   const updatedData = req.body;
 
-  if (!updatedData.title || !updatedData.venue || !updatedData.dateTime || !updatedData.desc || !updatedData.presenter || !updatedData.price) {
+  if (
+    !updatedData.title ||
+    !updatedData.venue ||
+    !updatedData.dateTime ||
+    !updatedData.desc ||
+    !updatedData.presenter ||
+    !updatedData.price
+  ) {
     res.setHeader("Content-Type", "text/plain");
     res.status(400).send("Request body must include all fields.");
     return;
   }
 
-  Event.findOneAndUpdate({eventId: req.params.eventId}, updatedData, {new: true})
+  Event.findOneAndUpdate({ eventId: req.params.eventId }, updatedData, { new: true })
     .then((data) => {
       if (data) {
         res.json(data);
