@@ -27,6 +27,15 @@ Building Web Applications
 
 */
 
+Accounts for testing:
+Admin: 
+Username: admin
+Password: admin
+
+User:
+Username: user
+Password: A123
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
