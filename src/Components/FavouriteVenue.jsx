@@ -38,7 +38,6 @@ class FavouriteLocations extends Component {
   // load all locations in a table
   LoadLocationList() {
     axios({
-      // need change localhost to the publicIP
       url: `http://localhost:8000/venue/fav/${this.state.user}`,
       method: "GET",
     })
