@@ -155,9 +155,9 @@ class User extends Component {
     return (
       <main>
         <div>
-          {/* <NavBar /> */}
+          {<NavBar />}
           <h1 style={{ textAlign: "left" }}>Manage Users</h1>
-          <Collapse
+          {/*<Collapse
             size="large"
             items={[
               {
@@ -166,7 +166,7 @@ class User extends Component {
                 children: <SignUp />,
               },
             ]}
-          ></Collapse>
+          ></Collapse>*/}
           <Button style={{ float: "left", marginLeft: "7px", marginBottom: "10px" }} type="primary" href="/register">
             Create User
           </Button>
