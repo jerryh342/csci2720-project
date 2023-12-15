@@ -142,6 +142,7 @@ class FavouriteLocations extends Component {
         <div>
           <NavBar />
         </div>
+        <h3>My Favourites</h3>
         <div>
           <Table
             columns={columns}
