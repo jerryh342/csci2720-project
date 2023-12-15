@@ -3,11 +3,11 @@ import axios from "axios";
 import { Table, Button, Input, Form, Modal, Select, DatePicker, TimePicker } from "antd";
 import { useForm } from "antd/lib/form/Form";
 import NavBar from "./navbar";
-import { PlusOutlined, EditOutlined, DeleteOutlined} from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import SuccessPage from "./Success";
 
-function EditEventForm({ event, venues }) {
+function EditEventForm({ event, venues, update }) {
   const [locationArr, setLocationArr] = useState([]);
   const [fullLoc, setFullLoc] = useState([]);
   const [showErr, setShowErr] = useState(false);
@@ -28,6 +28,7 @@ function EditEventForm({ event, venues }) {
     const venue = venues.filter((item) => item.locid == event.venue)[0];
     console.log(venue);
     form.setFieldsValue({ ...event, venue: venue.name });
+    setSuccess(false);
   }, [form, event]);
 
   const handleSubmit = (fieldValues) => {
@@ -55,6 +56,7 @@ function EditEventForm({ event, venues }) {
         setFormData({ eventId: parsedValue });
         form.resetFields();
         setSuccess(true);
+        update();
       })
       .catch((err) => {
         console.log("err>>", err);
@@ -109,7 +111,7 @@ function EditEventForm({ event, venues }) {
           onFinish={handleSubmit}
         >
           <Form.Item name="eventId" label="Event ID">
-            <Input readOnly />
+            <Input readOnly disabled />
           </Form.Item>
           <Form.Item
             name="title"
@@ -274,8 +276,8 @@ function CreateEventForm() {
   };
 
   useEffect(() => {
-    form.setFieldsValue(initialValues)
-   }, [form, initialValues])
+    form.setFieldsValue(initialValues);
+  }, [form, initialValues]);
 
   useEffect(() => {
     const fetchVenues = () => {
@@ -476,8 +478,7 @@ function Event() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [allowInput, setAllowInput] = useState(false);
-  const [isButtonEnabled, setIsButtonEnabled] = useState(true);
+  const [childUpdated, setChildUpdated] = useState(0);
   const [form] = Form.useForm();
   useEffect(() => {
     setIsLoading(true);
@@ -495,7 +496,11 @@ function Event() {
     };
     fetchVenues();
     loadEventList();
-  }, []);
+  }, [childUpdated]);
+
+  function onChildUpdate() {
+    setChildUpdated((current) => current + 1);
+  }
 
   useEffect(() => {
     form.setFieldsValue({ ...editingValues, eventId: editingKey });
@@ -526,32 +531,11 @@ function Event() {
     setIsModalOpen(true);
   };
 
-  const handleOk = () => {
-    form.submit();
-  };
+  const handleOk = () => {};
   const handleCancel = () => {
     setIsModalOpen(false);
     setIsDelModalOpen(false);
   };
-  /*
-  const updateEvent = (key) => {
-    axios({
-      url: "http://localhost:8000/admin/event/update/${key}",
-      method: "PUT",
-      data: editingValues,
-    })
-      .then((r) => {
-        console.log(r.data);
-        loadEventList();
-        setEditingKey("");
-        setEditingValues({});
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    console.log(key);
-  };
-  */
 
   const deleteEvent = (e) => {
     console.log(e);
@@ -571,7 +555,7 @@ function Event() {
       dataIndex: "title",
       key: "title",
       render: (text, record) => text,
-      width: 800
+      width: 800,
     },
     {
       title: "Operations",
@@ -579,7 +563,12 @@ function Event() {
       render: (text, record) => (
         <div>
           {
-            <Button style={{ marginBottom: "10px" }} type="primary" onClick={() => editEvent(record)} icon={<EditOutlined />}>
+            <Button
+              style={{ marginBottom: "10px" }}
+              type="primary"
+              onClick={() => editEvent(record)}
+              icon={<EditOutlined />}
+            >
               {/* Edit Event */}
             </Button>
           }
@@ -604,7 +593,7 @@ function Event() {
       </div>
       <div>
         <Modal footer={null} title="Edit Event" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-          <EditEventForm key={1} event={editingValues} venues={fullLoc} />
+          <EditEventForm key={1} event={editingValues} venues={fullLoc} update={onChildUpdate} />
         </Modal>
         {
           <Modal title="Delete Event" open={isDelModalOpen} onOk={handleCancel} onCancel={handleCancel}>
