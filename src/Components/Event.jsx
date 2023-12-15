@@ -816,7 +816,6 @@ class Event extends Component {
       .then((r) => {
         console.log(r.data);
         this.loadEventList();
-        // Update the user list with the updated user data
         this.setState((prevState) => ({
           editingKey: "",
           editingValues: {},

@@ -43,7 +43,6 @@ function NoMatch(props) {
     const item = sessionStorage.getItem(key);
     return item !== null;
   }
-  // Usage
   const itemExists = isSessionStorageItemExists("username");
   useEffect(() => {
     if (!itemExists) {
