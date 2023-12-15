@@ -780,7 +780,7 @@ app.put("/admin/event/update/:eventId", (req, res) => {
 
 app.post("/admin/event/create", async (req, res) => {
   try {
-    console.log("req.body>>", req.body)
+    console.log("req.body>>", req.body);
     const values = req.body;
     console.log("values>>", values);
     const eventid = values.eventId ? parseInt(values.eventId) : "";
@@ -815,7 +815,7 @@ app.post("/admin/event/create", async (req, res) => {
       .catch((err) => res.status(404).send(err));
   } catch (error) {
     console.log("error>>", error);
-    res.status(404).send(err)
+    res.status(404).send(err);
   }
 });
 
