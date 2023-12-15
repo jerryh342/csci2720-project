@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import axios from "axios";
-import { Card, Descriptions, Button, Form, Input, Alert, List } from "antd";
+import {Card, Descriptions, Button, Form, Input, Alert, List} from "antd";
 import NavBar from "./navbar";
 function getUsername() {
   return JSON.parse(sessionStorage.getItem("username"))?.value || "";
@@ -23,8 +23,8 @@ function Invite(props) {
       label: "Event Date & Time",
       children: invite.dateTime,
     },
-    { key: "2", label: "Venue ID", children: <a href={venueLink}>{invite.venue}</a> },
-    { key: "3", label: "Price", children: invite.price },
+    {key: "2", label: "Venue ID", children: <a href={venueLink}>{invite.venue}</a>},
+    {key: "3", label: "Price", children: invite.price},
   ];
   function getJoined() {
     axios({
@@ -90,15 +90,8 @@ function Invite(props) {
 
   return (
     <>
-      <Card style={{ width: "100%" }} title={invite.title} loading={isLoading}>
-        <Descriptions
-          title={"Event Details"}
-          layout={"horizontal"}
-          labelStyle={labelStyle}
-          bordered
-          items={details}
-          column={1}
-        />
+      <Card style={{width: "100%"}} title={invite.title} loading={isLoading}>
+        <Descriptions title={"Event Details"} layout={"horizontal"} labelStyle={labelStyle} bordered items={details} column={1} />
         <p>{invite.users.length} users is/are going to this event.</p>
         <Button onClick={handleClick}>{isJoined ? "Leave" : "Join"}</Button>
       </Card>
@@ -150,8 +143,7 @@ function NewInviteForm(props) {
             span: 12,
           }}
           label="Event ID:"
-          name="eventId"
-        >
+          name="eventId">
           <Input type="string" name="eventId" placeholder="Input Event ID" required />
         </Form.Item>
         <Button type="primary" htmlType="submit">
@@ -217,9 +209,9 @@ function Invites(props) {
           gutter: 16,
           xs: 1,
           sm: 2,
-          md: 4,
-          lg: 4,
-          xl: 6,
+          md: 2,
+          lg: 2,
+          xl: 2,
           xxl: 3,
         }}
         dataSource={invites}
