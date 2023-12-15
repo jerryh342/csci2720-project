@@ -60,7 +60,7 @@ const NavBar = (props) => {
             <HomeOutlined style={{ marginRight: 10 }} />
             Venues
           </Menu.Item>
-          <Menu.Item key="favourites">
+          <Menu.Item key="favourites" onClick={() => navigate("/venue/fav")}>
             <FaHeart style={{ marginRight: 10 }} />
             Favourites
           </Menu.Item>
