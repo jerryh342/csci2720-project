@@ -558,6 +558,41 @@ function Event() {
       width: 800,
     },
     {
+      title: "Event ID",
+      dataIndex: "eventId",
+      key: "eventId",
+    },
+    {
+      title: "Event Name",
+      dataIndex: "title",
+      key: "title",
+    },
+    {
+      title: "Venue",
+      dataIndex: "venue",
+      key: "venue",
+    },
+    {
+      title: "Date Time",
+      dataIndex: "dateTime",
+      key: "dateTime",
+    },
+    {
+      title: "Event Description",
+      dataIndex: "desc",
+      key: "desc",
+    },
+    {
+      title: "Presenter",
+      dataIndex: "presenter",
+      key: "presenter",
+    },
+    {
+      title: "Price",
+      dataIndex: "price",
+      key: "price",
+    },
+    {
       title: "Operations",
       key: "operations",
       render: (text, record) => (
