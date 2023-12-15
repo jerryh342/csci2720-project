@@ -54,37 +54,36 @@ const NavBar = (props) => {
     );
   } else {
     return (
-      <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "end" }} >
+      <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "" }}>
         <Row justify="end" gutter={32}>
-        <Col>
-        <Menu.Item key="left-item" style={{ marginRight: "100" }}>
-          {component}
-        </Menu.Item>
-        </Col>
-        <Col>
-        <Menu.Item key="venue" onClick={() => navigate("/venue")}>
-          <HomeOutlined style={{ marginRight: 10 }} />
-          Venues
-        </Menu.Item>
-        </Col>
-        <Col>
-        <Menu.Item key="favourites" >
-          <FaHeart style={{ marginRight: 10 }}/>
-          Favourites
-        </Menu.Item>
-        </Col>
-        <Col>
-        <Menu.Item key="invites" onClick={() => navigate("/invites")}>
-          <MailOutlined style={{ marginRight: 10 }} />
-          Event Invitations
-        </Menu.Item>
-        </Col>
-        <Col>
-        <Menu.Item key="right-item" style={{ marginLeft: "100" }}>
-          <SubMenu key="SubMenu" icon={<UserOutlined />} title={user.username}>
-            <Menu.Item key="setting:1" onClick={logOut}>
-              Logout
-
+          <Col>
+            <Menu.Item key="left-item" style={{ marginRight: "100" }}>
+              {component}
+            </Menu.Item>
+          </Col>
+          <Col>
+            <Menu.Item key="venue" onClick={() => navigate("/venue")}>
+              <HomeOutlined style={{ marginRight: 10 }} />
+              Venues
+            </Menu.Item>
+          </Col>
+          <Col>
+            <Menu.Item key="favourites">
+              <FaHeart style={{ marginRight: 10 }} />
+              Favourites
+            </Menu.Item>
+          </Col>
+          <Col>
+            <Menu.Item key="invites" onClick={() => navigate("/invites")}>
+              <MailOutlined style={{ marginRight: 10 }} />
+              Event Invitations
+            </Menu.Item>
+          </Col>
+          <Col>
+            <Menu.Item key="right-item" style={{ marginLeft: "100" }}>
+              <SubMenu key="SubMenu" icon={<UserOutlined />} title={user.username}>
+                <Menu.Item key="setting:1" onClick={logOut}>
+                  Logout
                 </Menu.Item>
                 {user.role == "admin" ? (
                   <Menu.Item key="setting:2" onClick={() => navigate("/admin/user")}>
