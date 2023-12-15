@@ -56,8 +56,8 @@ const NavBar = (props) => {
   } else {
     return (
       
-      <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "space-between" }}>
-        <Row justify="space-evenly">
+      <Menu mode="horizontal" theme="dark" style={{ display: "flex", justifyContent: "end" }} >
+        <Row justify="end" gutter={32}>
         <Col>
         <Menu.Item key="left-item" style={{ marginRight: "100" }}>
           {component}
