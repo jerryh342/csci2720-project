@@ -730,7 +730,7 @@ app.get("/invites", (req, res) => {
 app.delete("/admin/event/delete/:eventId", (req, res) => {
   Event.findOneAndDelete({ eventId: req.params["eventId"] })
     .then((data) => {
-      if (data.deletedCount === 1) {
+      if (data) {
         res.sendStatus(204);
       } else {
         res.setHeader("Content-Type", "text/plain");
@@ -739,6 +739,7 @@ app.delete("/admin/event/delete/:eventId", (req, res) => {
       }
     })
     .catch((error) => {
+      console.log(error);
       res.setHeader("Content-Type", "text/plain");
       res.status(500).send("Internal Server Error");
     });
@@ -751,7 +752,7 @@ app.put("/admin/event/update/:eventId", (req, res) => {
   if (
     !updatedData.title ||
     !updatedData.venue ||
-    !updatedData.dataTime ||
+    !updatedData.dateTime ||
     !updatedData.desc ||
     !updatedData.presenter ||
     !updatedData.price
@@ -826,8 +827,8 @@ app.get("/admin/event", (req, res) => {
         return {
           eventId: item.eventId,
           title: item.title,
-          loc: item.venue,
-          date: item.dateTime,
+          venue: item.venue,
+          dateTime: item.dateTime,
           desc: item.desc,
           presenter: item.presenter,
           price: item.price,

@@ -85,7 +85,7 @@ class User extends Component {
     const { editingKey, editingValues } = this.state;
     let role;
     try {
-      role = JSON.parse(sessionStorage.getItem("role")).value;
+      role = JSON.parse(sessionStorage.getItem("role"))?.value;
     } catch (error) {
       console.log("error>>", error);
     }
